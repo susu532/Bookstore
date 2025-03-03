@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">Librairie</a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item"><a class="nav-link" href="/books">Livres</a></li>
+      <% if (typeof user !== 'undefined') { %>
+        <li class="nav-item"><a class="nav-link" href="/cart">Panier</a></li>
+        <li class="nav-item"><a class="nav-link" href="/orders">Commandes</a></li>
+        <li class="nav-item"><a class="nav-link" href="/profile">Profil</a></li>
+        <% if (user.role === 1) { %>
+          <li class="nav-item"><a class="nav-link" href="/admin/users">Admin Utilisateurs</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin/orders">Admin Commandes</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin/stock">Admin Stock</a></li>
+        <% } %>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Déconnexion</a></li>
+      <% } else { %>
+        <li class="nav-item"><a class="nav-link" href="/login">Connexion</a></li>
+        <li class="nav-item"><a class="nav-link" href="/register">Inscription</a></li>
+      <% } %>
+    </ul>
+  </div>
+</nav>

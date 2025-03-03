@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Panier - Librairie</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <div class="container mt-5">
+    <h2>Votre Panier</h2>
+    <% if (cart.books.length === 0) { %>
+      <p>Votre panier est vide.</p>
+    <% } else { %>
+      <ul class="list-group mb-3">
+        <% cart.books.forEach(item => { %>
+          <li class="list-group-item">
+            <%= item.book.title %> - Quantité : <%= item.quantity %> - Prix : <%= item.book.price * item.quantity %> €
+          </li>
+        <% }) %>
+      </ul>
+      <button class="btn btn-success" onclick="checkout()">Valider la commande</button>
+    <% } %>
+  </div>
+  <%- include('partials/footer') %>
+  <script src="/js/client.js"></script>
+</body>
+</html>
