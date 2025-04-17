@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion des Livres - Librairie</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/navbar', { user }) %>
+  <div class="container mt-5">
+    <h2>Gestion des Livres</h2>
+    <a href="/admin/books/add?userId=<%= user._id %>" class="btn btn-success mb-3">Ajouter un Livre</a>
+    <form id="searchBooksForm" class="mb-3">
+      <div class="input-group">
+        <input type="text" class="form-control" id="searchQuery" placeholder="Rechercher par titre, auteur ou genre...">
+        <button type="submit" class="btn btn-primary">Rechercher</button>
+      </div>
+    </form>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Auteur</th>
+          <th>Genre</th>
+          <th>Prix (€)</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="booksTableBody">
+        <% books.forEach(book => { %>
+          <tr>
+            <td><%= book.title %></td>
+            <td><%= book.author %></td>
+            <td><%= book.genre %></td>
+            <td><%= book.price %></td>
+            <td><%= book.stock %></td>
+            <td>
+              <a href="/admin/books/edit/<%= book._id %>?userId=<%= user._id %>" class="btn btn-sm btn-primary">Modifier</a>
+              <button onclick="deleteBook('<%= book._id %>')" class="btn btn-sm btn-danger">Supprimer</button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/footer') %>
+  <script src="/js/client.js"></script>
+</body>
+</html>

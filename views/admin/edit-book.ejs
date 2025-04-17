@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Modifier un Livre - Librairie</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/navbar', { user }) %>
+  <div class="container mt-5">
+    <h2>Modifier le Livre</h2>
+    <form id="editBookForm">
+      <input type="hidden" name="bookId" value="<%= book._id %>">
+      <input type="hidden" name="userId" value="<%= user._id %>">
+      <div class="mb-3">
+        <label for="title" class="form-label">Titre</label>
+        <input type="text" class="form-control" id="title" name="title" value="<%= book.title %>" required>
+      </div>
+      <div class="mb-3">
+        <label for="author" class="form-label">Auteur</label>
+        <input type="text" class="form-control" id="author" name="author" value="<%= book.author %>" required>
+      </div>
+      <div class="mb-3">
+        <label for="genre" class="form-label">Genre</label>
+        <input type="text" class="form-control" id="genre" name="genre" value="<%= book.genre %>" required>
+      </div>
+      <div class="mb-3">
+        <label for="price" class="form-label">Prix (€)</label>
+        <input type="number" class="form-control" id="price" name="price" value="<%= book.price %>" step="0.01" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3"><%= book.description || '' %></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="stock" class="form-label">Stock</label>
+        <input type="number" class="form-control" id="stock" name="stock" value="<%= book.stock %>" min="0" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Mettre à jour</button>
+      <a href="/admin/books?userId=<%= user._id %>" class="btn btn-secondary ms-2">Annuler</a>
+    </form>
+  </div>
+  <%- include('../partials/footer') %>
+  <script src="/js/client.js"></script>
+</body>
+</html>

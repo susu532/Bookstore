@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau de bord - Librairie</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/navbar', { user }) %>
+  <div class="container mt-5">
+    <h2>Bienvenue, <%= user.name %> !</h2>
+    <p>Ceci est votre tableau de bord utilisateur.</p>
+    <div class="row">
+      <div class="col-md-4">
+        <a href="/books" class="btn btn-primary btn-block">Parcourir les livres</a>
+      </div>
+      <div class="col-md-4">
+        <a href="/cart" class="btn btn-primary btn-block">Voir mon panier</a>
+      </div>
+      <div class="col-md-4">
+        <a href="/orders" class="btn btn-primary btn-block">Historique des commandes</a>
+      </div>
+    </div>
+  </div>
+  <%- include('partials/footer') %>
+  <script src="/js/client.js"></script>
+</body>
+</html>

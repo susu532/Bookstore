@@ -10,10 +10,13 @@
   <%- include('partials/navbar') %>
   <div class="container mt-5">
     <h2>Nos Livres</h2>
-    <form class="mb-3" id="searchForm">
-      <input type="text" class="form-control" id="search" placeholder="Rechercher par titre ou auteur...">
+    <form class="mb-3" id="searchBooksForm">
+      <div class="input-group">
+        <input type="text" class="form-control" id="searchQuery" placeholder="Rechercher par titre, auteur ou genre...">
+        <button type="submit" class="btn btn-primary">Rechercher</button>
+      </div>
     </form>
-    <div class="row">
+    <div class="row" id="booksContainer">
       <% books.forEach(book => { %>
         <div class="col-md-4 mb-3">
           <div class="card">
@@ -30,5 +33,29 @@
   </div>
   <%- include('partials/footer') %>
   <script src="/js/client.js"></script>
+  <script>
+    document.getElementById('searchBooksForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = document.getElementById('searchQuery').value;
+      const res = await fetch(`/api/books/search?query=${encodeURIComponent(query)}`);
+      const books = await res.json();
+      const container = document.getElementById('booksContainer');
+      container.innerHTML = '';
+      books.forEach(book => {
+        container.innerHTML += `
+          <div class="col-md-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">${book.title}</h5>
+                <p class="card-text">Auteur : ${book.author}</p>
+                <p class="card-text">Prix : ${book.price} €</p>
+                <a href="/book/${book._id}" class="btn btn-primary">Détails</a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+  </script>
 </body>
 </html>

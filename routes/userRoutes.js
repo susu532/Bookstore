@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
-const auth = require('../middleware/auth');
 const User = require('../models/User');
 
 // Inscription
@@ -23,10 +21,9 @@ router.post('/register', [
     user = new User({ name, email, password });
     await user.save();
 
-    const payload = { id: user.id, role: user.role };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(201).json({ token });
+    res.status(201).json({ userId: user.id, redirectUrl: '/dashboard' });
   } catch (err) {
+    console.error('Erreur lors de l’inscription :', err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
@@ -37,49 +34,57 @@ router.post('/login', [
   check('password', 'Mot de passe requis').exists()
 ], async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    console.log('Erreurs de validation :', errors.array());
+    return res.status(400).json({ errors: errors.array() });
+  }
 
   const { email, password } = req.body;
+  console.log('Tentative de connexion avec :', { email, password });
   try {
     const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
+      console.log('Utilisateur non trouvé pour email :', email);
       return res.status(400).json({ message: 'Identifiants incorrects' });
     }
-    const payload = { id: user.id, role: user.role };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      console.log('Mot de passe incorrect pour :', email);
+      return res.status(400).json({ message: 'Identifiants incorrects' });
+    }
+    const redirectUrl = user.role === 1 ? '/admin/users' : '/dashboard';
+    console.log('Connexion réussie pour :', email);
+    res.json({ userId: user.id, redirectUrl });
   } catch (err) {
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
-});
-
-// Profil utilisateur
-router.get('/profile', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.render('profile', { user });
-  } catch (err) {
+    console.error('Erreur serveur lors de la connexion :', err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 // Mise à jour du profil
-router.put('/profile', auth, async (req, res) => {
-  const { name, email } = req.body;
+router.put('/profile', async (req, res) => {
+  const { userId, name, email, password } = req.body;
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+
     if (name) user.name = name;
     if (email) user.email = email;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
     await user.save();
-    res.json({ message: 'Profil mis à jour' });
+    res.json({ message: 'Profil mis à jour avec succès' });
   } catch (err) {
+    console.error('Erreur lors de la mise à jour du profil :', err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
 // Déconnexion
-router.post('/logout', auth, (req, res) => {
-  res.json({ message: 'Déconnexion réussie, supprimez le token côté client' });
+router.post('/logout', (req, res) => {
+  res.json({ message: 'Déconnexion réussie' });
 });
 
 module.exports = router;

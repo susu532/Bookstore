@@ -7,12 +7,15 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/navbar') %>
+  <%- include('partials/navbar', { user }) %>
   <div class="container mt-5">
     <h1>Bienvenue à la Librairie en ligne</h1>
     <p>Parcourez notre collection de livres ou connectez-vous pour commencer vos achats.</p>
     <p>Pour accéder au tableau de bord admin, utilisez : Email: AdminAdmin@gmail.com, Mot de passe: Admin1</p>
     <a href="/books" class="btn btn-primary">Voir les livres</a>
+    <% if (user && user.role === 1) { %>
+      <a href="/admin/users?userId=<%= user._id %>" class="btn btn-success ms-2">Tableau de bord Admin</a>
+    <% } %>
   </div>
   <%- include('partials/footer') %>
   <script src="/js/client.js"></script>
