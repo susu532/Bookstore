@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/books', {
   console.log('MongoDB connecté');
   const adminExists = await User.findOne({ email: 'AdminAdmin@gmail.com' });
   if (!adminExists) {
-    const hashedPassword = await bcrypt.hash('Admin', 10);
+    const hashedPassword = await bcrypt.hash('Admin1', 10);
     const admin = new User({
       name: 'Administrateur',
       email: 'AdminAdmin@gmail.com',
