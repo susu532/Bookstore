@@ -3,47 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <title>Modifier un Livre - Librairie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5.3+ -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .card {
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 32px rgba(80, 80, 180, 0.08);
+      border: none;
+    }
+    .form-floating > .form-control, .form-floating > .form-select {
+      border-radius: 0.75rem;
+    }
+    .form-label {
+      font-weight: 500;
+      color: #4f46e5;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #6366f1 0%, #a21caf 100%);
+      border: none;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(90deg, #a21caf 0%, #6366f1 100%);
+    }
+    .btn-secondary {
+      background: #f59e42;
+      border: none;
+      color: #fff;
+      font-weight: 600;
+    }
+    .btn-secondary:hover {
+      background: #ea580c;
+      color: #fff;
+    }
+    .icon-input {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6366f1;
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+    .form-floating .form-control {
+      padding-left: 2.5rem;
+    }
+    @media (max-width: 576px) {
+      .card {
+        padding: 0.5rem;
+      }
+      .container {
+        padding: 0.5rem !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('../partials/navbar', { user }) %>
-  <div class="container mt-5">
-    <h2>Modifier le Livre</h2>
-    <form id="editBookForm">
-      <input type="hidden" name="bookId" value="<%= book._id %>">
-      <input type="hidden" name="userId" value="<%= user._id %>">
-      <div class="mb-3">
-        <label for="title" class="form-label">Titre</label>
-        <input type="text" class="form-control" id="title" name="title" value="<%= book.title %>" required>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9">
+        <div class="card p-4 p-md-5 shadow-lg">
+          <div class="mb-4 text-center">
+            <span class="fs-1 text-primary"><i class="bi bi-journal-bookmark-fill"></i></span>
+            <h2 class="fw-bold mb-1" style="color:#a21caf;">Modifier le Livre</h2>
+            <p class="text-muted mb-0">Mettez à jour les informations du livre ci-dessous.</p>
+          </div>
+          <form id="editBookForm">
+            <input type="hidden" name="bookId" value="<%= book._id %>">
+            <input type="hidden" name="userId" value="<%= user._id %>">
+
+            <div class="form-floating mb-3 position-relative">
+              <input type="text" class="form-control" id="title" name="title" value="<%= book.title %>" placeholder="Titre" required>
+              <label for="title"><i class="bi bi-book icon-input"></i> Titre</label>
+            </div>
+            <div class="form-floating mb-3 position-relative">
+              <input type="text" class="form-control" id="author" name="author" value="<%= book.author %>" placeholder="Auteur" required>
+              <label for="author"><i class="bi bi-person icon-input"></i> Auteur</label>
+            </div>
+            <div class="form-floating mb-3 position-relative">
+              <input type="text" class="form-control" id="genre" name="genre" value="<%= book.genre %>" placeholder="Genre" required>
+              <label for="genre"><i class="bi bi-tags icon-input"></i> Genre</label>
+            </div>
+            <div class="form-floating mb-3 position-relative">
+              <input type="number" class="form-control" id="price" name="price" value="<%= book.price %>" step="0.01" min="0" placeholder="Prix" required>
+              <label for="price"><i class="bi bi-currency-euro icon-input"></i> Prix (€)</label>
+            </div>
+            <div class="form-floating mb-3 position-relative">
+              <textarea class="form-control" id="description" name="description" placeholder="Description" style="height: 100px"><%= book.description || '' %></textarea>
+              <label for="description"><i class="bi bi-card-text icon-input"></i> Description</label>
+            </div>
+            <div class="form-floating mb-4 position-relative">
+              <input type="number" class="form-control" id="stock" name="stock" value="<%= book.stock %>" min="0" placeholder="Stock" required>
+              <label for="stock"><i class="bi bi-box-seam icon-input"></i> Stock</label>
+            </div>
+            <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+              <button type="submit" class="btn btn-primary px-4 py-2">
+                <i class="bi bi-arrow-repeat me-2"></i>Mettre à jour
+              </button>
+              <a href="/admin/books?userId=<%= user._id %>" class="btn btn-secondary px-4 py-2">
+                <i class="bi bi-x-circle me-2"></i>Annuler
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="author" class="form-label">Auteur</label>
-        <input type="text" class="form-control" id="author" name="author" value="<%= book.author %>" required>
-      </div>
-      <div class="mb-3">
-        <label for="genre" class="form-label">Genre</label>
-        <input type="text" class="form-control" id="genre" name="genre" value="<%= book.genre %>" required>
-      </div>
-      <div class="mb-3">
-        <label for="price" class="form-label">Prix (€)</label>
-        <input type="number" class="form-control" id="price" name="price" value="<%= book.price %>" step="0.01" required>
-      </div>
-      <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description" rows="3"><%= book.description || '' %></textarea>
-      </div>
-      <div class="mb-3">
-        <label for="stock" class="form-label">Stock</label>
-        <input type="number" class="form-control" id="stock" name="stock" value="<%= book.stock %>" min="0" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Mettre à jour</button>
-      <a href="/admin/books?userId=<%= user._id %>" class="btn btn-secondary ms-2">Annuler</a>
-    </form>
+    </div>
   </div>
-   <div class="container mt-5">
-  <%- include('../partials/footer') %>
-</div>
+  <div class="container mt-5">
+    <%- include('../partials/footer') %>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/client.js"></script>
 </body>
 </html>

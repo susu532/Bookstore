@@ -3,92 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestion des Livres - Librairie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5.3 + Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* Modern colorful enhancements */
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .card {
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .form-label {
+      font-weight: 500;
+      color: #4f46e5;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #6366f1 0%, #3b82f6 100%);
+      border: none;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+    .btn-info {
+      background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+      border: none;
+      color: #fff;
+    }
+    .btn-info:hover {
+      background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+      color: #fff;
+    }
+    .table thead {
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+    }
+    .table-striped>tbody>tr:nth-of-type(odd)>* {
+      background-color: #f1f5f9;
+    }
+    .section-title {
+      color: #3b82f6;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+    .input-group .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(99,102,241,.25);
+      border-color: #6366f1;
+    }
+    @media (max-width: 767px) {
+      .card {
+        margin-bottom: 1.5rem;
+      }
+      .table-responsive {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('../partials/navbar', { user }) %>
-  <div class="container mt-5">
-    <h2>Gestion des Livres</h2>
-
-    <!-- Formulaire d'ajout -->
-    <h3>Ajouter un Nouveau Livre</h3>
-    <form id="addBookForm" class="mb-4">
-      <input type="hidden" name="userId" value="<%= user._id %>">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="title" class="form-label">Titre</label>
-          <input type="text" class="form-control" id="title" name="title" required>
+  <div class="container py-5">
+    <div class="row g-4">
+      <!-- Add Book Form -->
+      <div class="col-lg-5">
+        <div class="card p-4 shadow-sm">
+          <h3 class="section-title"><i class="bi bi-plus-circle me-2"></i>Ajouter un Nouveau Livre</h3>
+          <form id="addBookForm" autocomplete="off">
+            <input type="hidden" name="userId" value="<%= user._id %>">
+            <div class="mb-3">
+              <label for="title" class="form-label">Titre</label>
+              <input type="text" class="form-control" id="title" name="title" required placeholder="Ex: Le Petit Prince">
+            </div>
+            <div class="mb-3">
+              <label for="author" class="form-label">Auteur</label>
+              <input type="text" class="form-control" id="author" name="author" required placeholder="Ex: Antoine de Saint-Exupéry">
+            </div>
+            <div class="mb-3">
+              <label for="genre" class="form-label">Genre</label>
+              <input type="text" class="form-control" id="genre" name="genre" required placeholder="Ex: Roman">
+            </div>
+            <div class="mb-3">
+              <label for="price" class="form-label">Prix (€)</label>
+              <input type="number" class="form-control" id="price" name="price" step="0.01" required placeholder="Ex: 12.99">
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" name="description" rows="2" placeholder="Brève description..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="stock" class="form-label">Stock</label>
+              <input type="number" class="form-control" id="stock" name="stock" min="0" value="0">
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Ajouter le Livre</button>
+          </form>
         </div>
-        <div class="col-md-6 mb-3">
-          <label for="author" class="form-label">Auteur</label>
-          <input type="text" class="form-control" id="author" name="author" required>
+      </div>
+      <!-- Book List & Search -->
+      <div class="col-lg-7">
+        <div class="card p-4 shadow-sm mb-4">
+          <h3 class="section-title"><i class="bi bi-search me-2"></i>Rechercher des Livres</h3>
+          <form id="searchBooksForm" class="mb-0">
+            <div class="input-group">
+              <input type="text" class="form-control" id="searchQuery" placeholder="Titre, auteur ou genre...">
+              <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Rechercher</button>
+            </div>
+          </form>
+        </div>
+        <div class="card p-4 shadow-sm">
+          <h3 class="section-title"><i class="bi bi-book-half me-2"></i>Liste des Livres</h3>
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th scope="col"><i class="bi bi-book"></i> Titre</th>
+                  <th scope="col"><i class="bi bi-person"></i> Auteur</th>
+                  <th scope="col"><i class="bi bi-tags"></i> Genre</th>
+                  <th scope="col"><i class="bi bi-currency-euro"></i> Prix</th>
+                  <th scope="col"><i class="bi bi-box"></i> Stock</th>
+                  <th scope="col"><i class="bi bi-gear"></i> Actions</th>
+                </tr>
+              </thead>
+              <tbody id="booksTableBody">
+                <% books.forEach(book => { %>
+                  <tr data-book-id="<%= book._id %>">
+                    <td><%= book.title %></td>
+                    <td><%= book.author %></td>
+                    <td><span class="badge bg-info bg-gradient text-dark"><%= book.genre %></span></td>
+                    <td><span class="fw-bold text-success"><%= book.price %></span></td>
+                    <td>
+                      <% if (book.stock > 5) { %>
+                        <span class="badge bg-success"><%= book.stock %></span>
+                      <% } else if (book.stock > 0) { %>
+                        <span class="badge bg-warning text-dark"><%= book.stock %></span>
+                      <% } else { %>
+                        <span class="badge bg-danger">Rupture</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <button onclick="editBook('<%= book._id %>')" class="btn btn-sm btn-primary me-1" title="Modifier">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                      <button onclick="deleteBook('<%= book._id %>')" class="btn btn-sm btn-danger me-1" title="Supprimer">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                      <a href="/book/<%= book._id %>" class="btn btn-sm btn-info" title="Détails">
+                        <i class="bi bi-info-circle"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="genre" class="form-label">Genre</label>
-          <input type="text" class="form-control" id="genre" name="genre" required>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label for="price" class="form-label">Prix (€)</label>
-          <input type="number" class="form-control" id="price" name="price" step="0.01" required>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-      </div>
-      <div class="mb-3">
-        <label for="stock" class="form-label">Stock</label>
-        <input type="number" class="form-control" id="stock" name="stock" min="0" value="0">
-      </div>
-      <button type="submit" class="btn btn-primary">Ajouter le Livre</button>
-    </form>
-
-    <!-- Recherche -->
-    <h3>Rechercher des Livres</h3>
-    <form id="searchBooksForm" class="mb-4">
-      <div class="input-group">
-        <input type="text" class="form-control" id="searchQuery" placeholder="Titre, auteur ou genre...">
-        <button type="submit" class="btn btn-primary">Rechercher</button>
-      </div>
-    </form>
-
-    <!-- Liste des livres -->
-    <h3>Liste des Livres</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Titre</th>
-          <th>Auteur</th>
-          <th>Genre</th>
-          <th>Prix (€)</th>
-          <th>Stock</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="booksTableBody">
-        <% books.forEach(book => { %>
-          <tr data-book-id="<%= book._id %>">
-            <td><%= book.title %></td>
-            <td><%= book.author %></td>
-            <td><%= book.genre %></td>
-            <td><%= book.price %></td>
-            <td><%= book.stock %></td>
-            <td>
-              <button onclick="editBook('<%= book._id %>')" class="btn btn-sm btn-primary">Modifier</button>
-              <button onclick="deleteBook('<%= book._id %>')" class="btn btn-sm btn-danger">Supprimer</button>
-              <a href="/book/<%= book._id %>" class="btn btn-sm btn-info">Détails</a>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    </div>
   </div>
-   <div class="container mt-5">
-  <%- include('../partials/footer') %>
-</div>
+  <footer class="bg-white border-top py-4 mt-5">
+    <div class="container text-center">
+      <%- include('../partials/footer') %>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/client.js"></script>
 </body>
 </html>

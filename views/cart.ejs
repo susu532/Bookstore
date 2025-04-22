@@ -3,27 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <title>Panier - Librairie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .cart-header {
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+      border-radius: 1rem 1rem 0 0;
+      padding: 2rem 1.5rem 1rem 1.5rem;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.08);
+    }
+    .cart-card {
+      border-radius: 1rem;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.07);
+      background: #fff;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .cart-list-item {
+      background: #f1f5f9;
+      border: none;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      transition: background 0.2s;
+    }
+    .cart-list-item:hover {
+      background: #e0e7ff;
+    }
+    .cart-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #374151;
+    }
+    .cart-qty, .cart-price {
+      font-size: 1rem;
+      color: #6366f1;
+      font-weight: 600;
+    }
+    .cart-empty {
+      color: #64748b;
+      font-size: 1.2rem;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .checkout-btn {
+      background: linear-gradient(90deg, #06b6d4 0%, #6366f1 100%);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0.75rem 2.5rem;
+      border-radius: 2rem;
+      box-shadow: 0 2px 12px rgba(6,182,212,0.15);
+      transition: background 0.2s, transform 0.1s;
+    }
+    .checkout-btn:hover {
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      transform: translateY(-2px) scale(1.03);
+    }
+    @media (max-width: 576px) {
+      .cart-header {
+        padding: 1.2rem 0.7rem 0.7rem 0.7rem;
+        font-size: 1.3rem;
+      }
+      .cart-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem 0.7rem;
+      }
+      .checkout-btn {
+        width: 100%;
+        padding: 0.75rem 0;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('partials/navbar') %>
-  <div class="container mt-5">
-    <h2>Votre Panier</h2>
-    <% if (cart.books.length === 0) { %>
-      <p>Votre panier est vide.</p>
-    <% } else { %>
-      <ul class="list-group mb-3">
-        <% cart.books.forEach(item => { %>
-          <li class="list-group-item">
-            <%= item.book.title %> - Quantité : <%= item.quantity %> - Prix : <%= item.book.price * item.quantity %> €
-          </li>
-        <% }) %>
-      </ul>
-      <button class="btn btn-success" onclick="checkout()">Valider la commande</button>
-    <% } %>
-  </div> <div class="container mt-5">
-  <%- include('partials/footer') %>
-</div>  <script src="/js/client.js"></script>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9">
+        <div class="cart-card">
+          <div class="cart-header text-center">
+            <h2 class="mb-0">🛒 Votre Panier</h2>
+          </div>
+          <div class="p-4">
+            <% if (cart.books.length === 0) { %>
+              <div class="cart-empty">
+                <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+                <div>Votre panier est vide.</div>
+              </div>
+            <% } else { %>
+              <ul class="list-group mb-4 border-0">
+                <% cart.books.forEach(item => { %>
+                  <li class="cart-list-item list-group-item d-flex flex-wrap align-items-center justify-content-between">
+                    <span class="cart-title"><%= item.book.title %></span>
+                    <span class="cart-qty">Quantité : <%= item.quantity %></span>
+                    <span class="cart-price">Prix : <%= (item.book.price * item.quantity).toFixed(2) %> €</span>
+                  </li>
+                <% }) %>
+              </ul>
+              <div class="d-flex justify-content-end">
+                <button class="checkout-btn" onclick="checkout()">Valider la commande</button>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <%- include('partials/footer') %>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
+  <script src="/js/client.js"></script>
 </body>
 </html>

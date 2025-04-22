@@ -1,3 +1,40 @@
+// Notification UI
+function showNotification(message, type = 'info', duration = 7000) { // duration increased
+  let container = document.getElementById('notification-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'notification-container';
+    container.style.position = 'fixed';
+    container.style.top = '30px';
+    container.style.right = '30px';
+    container.style.zIndex = '9999';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';
+    document.body.appendChild(container);
+  }
+  const notif = document.createElement('div');
+  notif.innerText = message;
+  notif.style.padding = '16px 24px';
+  notif.style.borderRadius = '8px';
+  notif.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+  notif.style.color = '#fff';
+  notif.style.fontSize = '1rem';
+  notif.style.fontWeight = '500';
+  notif.style.background = type === 'error'
+    ? 'linear-gradient(90deg,#e53935,#e35d5b)'
+    : type === 'success'
+      ? 'linear-gradient(90deg,#43cea2,#185a9d)'
+      : 'linear-gradient(90deg,#2193b0,#6dd5ed)';
+  notif.style.opacity = '0.95';
+  notif.style.transition = 'opacity 1.2s'; // slower fade-out
+  container.appendChild(notif);
+  setTimeout(() => {
+    notif.style.opacity = '0';
+    setTimeout(() => notif.remove(), 1200); // match fade-out duration
+  }, duration);
+}
+
 // Connexion
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -13,7 +50,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     localStorage.setItem('userId', data.userId);
     window.location.href = `${data.redirectUrl}?userId=${data.userId}`;
   } else {
-    alert(data.message || 'Erreur lors de la connexion');
+    showNotification(data.message || 'Erreur lors de la connexion', 'error');
   }
 });
 
@@ -33,7 +70,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     localStorage.setItem('userId', data.userId);
     window.location.href = `${data.redirectUrl}?userId=${data.userId}`;
   } else {
-    alert(data.message || 'Erreur lors de l’inscription');
+    showNotification(data.message || 'Erreur lors de l’inscription', 'error');
   }
 });
 
@@ -51,10 +88,10 @@ document.getElementById('profileForm')?.addEventListener('submit', async (e) => 
   });
   const data = await res.json();
   if (res.ok) {
-    alert(data.message);
+    showNotification(data.message, 'success');
     window.location.reload();
   } else {
-    alert(data.message || 'Erreur lors de la mise à jour');
+    showNotification(data.message || 'Erreur lors de la mise à jour', 'error');
   }
 });
 
@@ -75,10 +112,10 @@ document.getElementById('addBookForm')?.addEventListener('submit', async (e) => 
   });
   const data = await res.json();
   if (res.ok) {
-    alert(data.message);
+    showNotification(data.message, 'success');
     window.location.reload();
   } else {
-    alert(data.message || 'Erreur lors de l’ajout du livre');
+    showNotification(data.message || 'Erreur lors de l’ajout du livre', 'error');
   }
 });
 
@@ -105,10 +142,10 @@ async function editBook(bookId) {
   });
   const data = await res.json();
   if (res.ok) {
-    alert(data.message);
+    showNotification(data.message, 'success');
     window.location.reload();
   } else {
-    alert(data.message || 'Erreur lors de la mise à jour');
+    showNotification(data.message || 'Erreur lors de la mise à jour', 'error');
   }
 }
 
@@ -121,10 +158,10 @@ async function deleteBook(bookId) {
     });
     const data = await res.json();
     if (res.ok) {
-      alert(data.message);
+      showNotification(data.message, 'success');
       window.location.reload();
     } else {
-      alert(data.message || 'Erreur lors de la suppression');
+      showNotification(data.message || 'Erreur lors de la suppression', 'error');
     }
   }
 }
@@ -171,7 +208,7 @@ document.getElementById('addToCartForm')?.addEventListener('submit', async (e) =
   });
   const data = await res.json();
   if (res.ok) window.location.href = `/cart?userId=${userId}`;
-  else alert(data.message || 'Erreur lors de l’ajout au panier');
+  else showNotification(data.message || 'Erreur lors de l’ajout au panier', 'error');
 });
 
 document.getElementById('addToCartForm')?.addEventListener('submit', async (e) => {
@@ -186,12 +223,13 @@ document.getElementById('addToCartForm')?.addEventListener('submit', async (e) =
   });
   const data = await res.json();
   if (res.ok) {
-    alert(data.message);
+    showNotification(data.message, 'success');
     window.location.reload();
   } else {
-    alert(data.message || 'Erreur lors de l’ajout au panier');
+    showNotification(data.message || 'Erreur lors de l’ajout au panier', 'error');
   }
 });
+
 // Valider la commande
 async function checkout() {
   const userId = localStorage.getItem('userId');
@@ -202,7 +240,7 @@ async function checkout() {
   });
   const data = await res.json();
   if (res.ok) window.location.href = `/orders?userId=${userId}`;
-  else alert(data.message || 'Erreur lors de la validation');
+  else showNotification(data.message || 'Erreur lors de la validation', 'error');
 }
 async function checkout() {
   const userId = localStorage.getItem('userId');
@@ -213,10 +251,10 @@ async function checkout() {
   });
   const data = await res.json();
   if (res.ok) {
-    alert(data.message);
+    showNotification(data.message, 'success');
     window.location.reload();
   } else {
-    alert(data.message || 'Erreur lors de la validation');
+    showNotification(data.message || 'Erreur lors de la validation', 'error');
   }
 }
 
@@ -235,7 +273,7 @@ async function toggleUser(userId, isActive) {
   });
   const data = await res.json();
   if (res.ok) window.location.reload();
-  else alert(data.message || 'Erreur lors de la mise à jour');
+  else showNotification(data.message || 'Erreur lors de la mise à jour', 'error');
 }
 
 // Mise à jour du stock (pour la vue stock admin)
@@ -249,14 +287,13 @@ async function updateStock(e, bookId) {
   });
   const data = await res.json();
   if (res.ok) window.location.reload();
-  else alert(data.message || 'Erreur lors de la mise à jour');
+  else showNotification(data.message || 'Erreur lors de la mise à jour', 'error');
 }
 
 async function redirectToDashboard(userId) {
-  const res = await fetch('/api/users/profile', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId })
+  const res = await fetch(`/api/users/profile?userId=${userId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
   });
   const data = await res.json();
   if (res.ok && data.user) {
@@ -266,6 +303,6 @@ async function redirectToDashboard(userId) {
       window.location.href = `/dashboard?userId=${userId}`;
     }
   } else {
-    alert('Erreur lors de la vérification du rôle');
+    showNotification('Erreur lors de la vérification du rôle', 'error');
   }
 }

@@ -3,40 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestion Stock - Librairie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Fonts for modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    .stock-header {
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+      border-radius: 1rem;
+      padding: 2rem 2rem 1rem 2rem;
+      box-shadow: 0 4px 24px 0 rgba(99,102,241,0.08);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .table-modern {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .table-modern th {
+      background: #6366f1;
+      color: #fff;
+      border: none;
+    }
+    .table-modern td {
+      vertical-align: middle;
+      border-top: none;
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #06b6d4 0%, #6366f1 100%);
+      color: #fff;
+      border: none;
+      transition: background 0.2s;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+    }
+    .form-control:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.15);
+    }
+    @media (max-width: 768px) {
+      .stock-header {
+        padding: 1rem;
+        font-size: 1.2rem;
+      }
+      .table-responsive {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('../partials/navbar') %>
-  <div class="container mt-5">
-    <h2>Gestion des Stocks</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Titre</th>
-          <th>Stock</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% books.forEach(book => { %>
+  <div class="container py-4">
+    <div class="stock-header mb-4 shadow">
+      <h2 class="fw-bold mb-0">Gestion des Stocks</h2>
+      <p class="mt-2 mb-0">Surveillez et ajustez le stock de vos livres en toute simplicité.</p>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-modern align-middle">
+        <thead>
           <tr>
-            <td><%= book.title %></td>
-            <td><%= book.stock %></td>
-            <td>
-              <form class="d-inline" onsubmit="updateStock(event, '<%= book._id %>')">
-                <input type="number" class="form-control d-inline w-25" name="stock" value="<%= book.stock %>" min="0" required>
-                <button type="submit" class="btn btn-sm btn-primary">Mettre à jour</button>
-              </form>
-            </td>
+            <th scope="col">Titre</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Action</th>
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% books.forEach(book => { %>
+            <tr>
+              <td class="fw-semibold text-primary"><%= book.title %></td>
+              <td>
+                <span class="badge rounded-pill bg-info text-dark fs-6 px-3 py-2"><%= book.stock %></span>
+              </td>
+              <td>
+                <form class="d-flex align-items-center gap-2" onsubmit="updateStock(event, '<%= book._id %>')">
+                  <input type="number" class="form-control form-control-sm w-50" name="stock" value="<%= book.stock %>" min="0" required>
+                  <button type="submit" class="btn btn-gradient btn-sm fw-bold shadow-sm">Mettre à jour</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </div>
-   <div class="container mt-5">
-  <%- include('../partials/footer') %>
-</div>
+  <div class="container mt-5">
+    <%- include('../partials/footer') %>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/client.js"></script>
 </body>
 </html>
