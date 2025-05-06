@@ -67,8 +67,7 @@
       <div class="col-lg-5">
         <div class="card shadow-sm p-4 h-100">
           <h3 class="mb-4 text-primary"><i class="bi bi-cart-plus"></i> Ajouter des Livres au Panier</h3>
-          <form id="addToCartForm" class="mb-3">
-            <input type="hidden" name="userId" value="<%= user._id %>">
+          <form id="addToCartForm" class="mb-3" autocomplete="off">
             <div class="mb-3">
               <label for="bookId" class="form-label">Sélectionner un livre</label>
               <select class="form-select" id="bookId" name="bookId" required>
@@ -85,7 +84,7 @@
               <label for="quantity" class="form-label">Quantité</label>
               <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">
+            <button type="submit" class="btn btn-primary w-100" id="addToCartBtn">
               <i class="bi bi-plus-circle"></i> Ajouter au Panier
             </button>
           </form>
@@ -179,5 +178,28 @@
     <%- include('../partials/footer') %>
   </div>
   <script src="/js/client.js"></script>
+  <script>
+    // Correction pour éviter le double envoi ou le blocage du bouton
+    document.getElementById('addToCartForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('addToCartBtn');
+      btn.disabled = true;
+      const bookId = document.getElementById('bookId').value;
+      const quantity = document.getElementById('quantity').value;
+      const res = await fetch('/api/orders/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId, quantity })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showNotification(data.message || 'Ajouté au panier', 'success');
+        window.location.reload();
+      } else {
+        showNotification(data.message || 'Erreur lors de l’ajout au panier', 'error');
+        btn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>

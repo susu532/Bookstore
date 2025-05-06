@@ -3,10 +3,33 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
+const passport = require('passport');
 const User = require('./models/User');
 
 dotenv.config();
 const app = express();
+
+// Session & Passport setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'library_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // set to true if using HTTPS
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport local strategy
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id).select('-password');
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
 
 // Middleware
 app.use(express.json());
@@ -29,7 +52,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/books', {
     const admin = new User({
       name: 'Administrateur',
       email: 'AdminAdmin@gmail.com',
-      password: 'Admin1',
+      password: hashedPassword,
       role: 1,
       isActive: true
     });
@@ -45,36 +68,54 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/emprunts', require('./routes/empruntRoutes'));
 
-// Routes Frontend
-const checkAuth = async (req, res, next) => {
-  const userId = req.query.userId;
-  if (!userId) return res.redirect('/login');
-  const user = await User.findById(userId).select('-password');
-  if (!user) return res.redirect('/login');
-  req.user = user;
-  next();
+// Auth middleware for protected routes
+const checkAuth = (req, res, next) => {
+  if (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) return next();
+  return res.redirect('/login');
 };
 
-app.get('/', (req, res) => res.render('home', { user: null }));
-app.get('/login', (req, res) => res.render('login'));
-app.get('/register', (req, res) => res.render('register'));
+// Login route (POST)
+app.post('/login', async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.render('login', { error: 'Utilisateur non trouvé', user: null });
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return res.render('login', { error: 'Mot de passe incorrect', user: null });
+  req.login(user, err => {
+    if (err) return next(err);
+    return res.redirect('/dashboard');
+  });
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+  req.logout(() => {
+    res.redirect('/login');
+  });
+});
+
+// Routes Frontend
+app.get('/', (req, res) => res.render('home', { user: req.user || null }));
+app.get('/login', (req, res) => res.render('login', { user: req.user || null, error: null }));
+app.get('/register', (req, res) => res.render('register', { user: req.user || null }));
 app.get('/profile', checkAuth, (req, res) => res.render('profile', { user: req.user }));
 app.get('/books', async (req, res) => {
   const books = await require('./models/Book').find({ stock: { $gt: 0 } });
-  res.render('books', { books });
+  res.render('books', { books, user: req.user || null });
 });
 app.get('/book/:bookId', async (req, res) => {
   const book = await require('./models/Book').findById(req.params.bookId);
-  res.render('book', { book });
+  res.render('book', { book, user: req.user || null });
 });
 app.get('/cart', checkAuth, async (req, res) => {
   const cart = await require('./models/Cart').findOne({ user: req.user._id }).populate('books.book');
-  res.render('cart', { cart: cart || { books: [] } });
+  res.render('cart', { cart: cart || { books: [] }, user: req.user });
 });
 app.get('/orders', checkAuth, async (req, res) => {
   const orders = await require('./models/Order').find({ user: req.user._id }).populate('books.book');
-  res.render('orders', { orders });
+  res.render('orders', { orders, user: req.user });
 });
 app.get('/dashboard', checkAuth, (req, res) => res.render('dashboard', { user: req.user }));
 app.get('/books/manage', checkAuth, async (req, res) => {
@@ -87,24 +128,34 @@ app.get('/orders/manage', checkAuth, async (req, res) => {
   const books = await require('./models/Book').find({ stock: { $gt: 0 } });
   res.render('orders/manage', { user: req.user, cart: cart || { books: [] }, orders, books });
 });
+app.get('/emprunts', checkAuth, async (req, res) => {
+  const Emprunt = require('./models/Emprunt');
+  const emprunts = await Emprunt.find({ user: req.user._id }).populate('book');
+  res.render('emprunts', { user: req.user, emprunts });
+});
 
 // Routes Admin
-const checkAdmin = async (req, res, next) => {
+const checkAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 1) return res.status(403).json({ message: 'Accès refusé' });
   next();
 };
 
 app.get('/admin/users', checkAuth, checkAdmin, async (req, res) => {
   const users = await User.find().select('-password');
-  res.render('admin/users', { users });
+  res.render('admin/users', { users, user: req.user });
 });
 app.get('/admin/orders', checkAuth, checkAdmin, async (req, res) => {
   const orders = await require('./models/Order').find().populate('user', 'name').populate('books.book');
-  res.render('admin/orders', { orders });
+  res.render('admin/orders', { orders, user: req.user });
 });
 app.get('/admin/stock', checkAuth, checkAdmin, async (req, res) => {
   const books = await require('./models/Book').find();
-  res.render('admin/stock', { books });
+  res.render('admin/stock', { books, user: req.user });
+});
+app.get('/admin/emprunts', checkAuth, checkAdmin, async (req, res) => {
+  const Emprunt = require('./models/Emprunt');
+  const emprunts = await Emprunt.find().populate('user').populate('book');
+  res.render('admin/emprunts', { user: req.user, emprunts });
 });
 
 const PORT = process.env.PORT || 3000;

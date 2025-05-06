@@ -33,6 +33,17 @@ body {
   border-radius: 1.5rem;
 }
 
+.card.bg-red-100 {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #f87171;
+}
+.card.bg-yellow-100 {
+  background: #fef9c3;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
 /* Buttons */
 .btn {
   @apply px-8 py-3 rounded-xl font-bold text-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-4;

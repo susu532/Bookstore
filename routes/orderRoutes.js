@@ -6,7 +6,9 @@ const Book = require('../models/Book');
 
 // Ajouter au panier
 router.post('/cart', async (req, res) => {
-  const { userId, bookId, quantity } = req.body;
+  // Utiliser req.user._id si connecté via session
+  const userId = req.user ? req.user._id : req.body.userId;
+  const { bookId, quantity } = req.body;
   try {
     const book = await Book.findById(bookId);
     if (!book || book.stock < quantity) return res.status(400).json({ message: 'Stock insuffisant ou livre introuvable' });
@@ -29,7 +31,8 @@ router.post('/cart', async (req, res) => {
 // Voir le panier
 router.get('/cart', async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.query.userId }).populate('books.book');
+    const userId = req.user ? req.user._id : req.query.userId;
+    const cart = await Cart.findOne({ user: userId }).populate('books.book');
     if (!cart) return res.json({ books: [] });
     res.json(cart);
   } catch (err) {
@@ -40,7 +43,7 @@ router.get('/cart', async (req, res) => {
 
 // Valider la commande
 router.post('/checkout', async (req, res) => {
-  const { userId } = req.body;
+  const userId = req.user ? req.user._id : req.body.userId;
   try {
     const cart = await Cart.findOne({ user: userId }).populate('books.book');
     if (!cart || cart.books.length === 0) return res.status(400).json({ message: 'Panier vide' });
@@ -67,7 +70,8 @@ router.post('/checkout', async (req, res) => {
 // Historique des commandes
 router.get('/history', async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.query.userId }).populate('books.book');
+    const userId = req.user ? req.user._id : req.query.userId;
+    const orders = await Order.find({ user: userId }).populate('books.book');
     res.json(orders);
   } catch (err) {
     console.error('Erreur lors de la récupération de l’historique :', err);

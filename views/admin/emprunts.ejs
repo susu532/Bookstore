@@ -1,0 +1,58 @@
+<%- include('../partials/navbar', { user }) %>
+<div class="container">
+  <h1>Gestion des Emprunts</h1>
+  <div id="emprunt-stats" class="mb-6"></div>
+  <div id="overdue-alerts" class="mb-6"></div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Utilisateur</th>
+        <th>Livre</th>
+        <th>Date d'emprunt</th>
+        <th>Date de retour</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% emprunts.forEach(e => { %>
+        <tr>
+          <td><%= e.user.name %> (<%= e.user.email %>)</td>
+          <td><%= e.book.title %></td>
+          <td><%= e.dateEmprunt.toLocaleDateString() %></td>
+          <td><%= e.dateRetour ? e.dateRetour.toLocaleDateString() : 'Non retourné' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  // Stats
+  const statsRes = await fetch('/api/emprunts/stats');
+  if (statsRes.ok) {
+    const stats = await statsRes.json();
+    document.getElementById('emprunt-stats').innerHTML = `
+      <div class="card">
+        <b>Total emprunts :</b> ${stats.total} &nbsp; | 
+        <b>En cours :</b> ${stats.actifs} &nbsp; | 
+        <b>Retournés :</b> ${stats.returned} <br>
+        <b>Top livres :</b> ${stats.topBooks.map(b => `${b.title} (${b.count})`).join(', ')}
+      </div>
+    `;
+  }
+  // Overdue
+  const overdueRes = await fetch('/api/emprunts/overdue');
+  if (overdueRes.ok) {
+    const data = await overdueRes.json();
+    if (data.emprunts.length > 0) {
+      document.getElementById('overdue-alerts').innerHTML = `
+        <div class="card bg-red-100 text-red-800">
+          <b>Emprunts en retard :</b>
+          <ul>
+            ${data.emprunts.map(e => `<li>${e.user.name} - ${e.book.title} (depuis le ${new Date(e.dateEmprunt).toLocaleDateString()})</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+  }
+});
+</script>

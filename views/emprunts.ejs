@@ -1,0 +1,125 @@
+<%- include('partials/navbar', { user }) %>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-lg p-4 mb-5 rounded-4 border-0 animate__animated animate__fadeInUp" style="background:rgba(255,255,255,0.92);">
+        <div class="d-flex align-items-center mb-4">
+          <i class="bi bi-journal-bookmark-fill fs-2 text-primary me-3 animate__animated animate__bounceIn"></i>
+          <h1 class="mb-0 fw-bold text-gradient"
+              style="background: linear-gradient(90deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent; animation: gradientMove 3s infinite alternate;">
+            Mes Emprunts
+          </h1>
+        </div>
+        <div id="overdue-user-alert" class="mb-4"></div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle rounded-3 overflow-hidden shadow-sm animate__animated animate__fadeIn">
+            <thead class="table-light">
+              <tr>
+                <th class="text-primary">Livre</th>
+                <th class="text-primary">Date d'emprunt</th>
+                <th class="text-primary">Date de retour</th>
+                <th class="text-primary">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (emprunts.length === 0) { %>
+                <tr>
+                  <td colspan="4" class="text-center text-secondary py-4 animate__animated animate__fadeInDown">
+                    <i class="bi bi-emoji-frown fs-3"></i><br>
+                    Aucun emprunt trouvé.
+                  </td>
+                </tr>
+              <% } else { %>
+                <% emprunts.forEach(e => { %>
+                  <tr class="<%= !e.dateRetour ? 'table-warning animate__animated animate__pulse animate__delay-1s' : 'animate__animated animate__fadeIn' %>">
+                    <td>
+                      <span class="fw-semibold"><i class="bi bi-book"></i> <%= e.book.title %></span>
+                    </td>
+                    <td>
+                      <span class="badge bg-gradient-to-r from-blue-100 to-purple-100 text-primary shadow-sm px-3 py-2 rounded-pill animate__animated animate__fadeInLeft">
+                        <i class="bi bi-calendar-event"></i> <%= e.dateEmprunt.toLocaleDateString() %>
+                      </span>
+                    </td>
+                    <td>
+                      <% if (e.dateRetour) { %>
+                        <span class="badge bg-success bg-opacity-25 text-success px-3 py-2 rounded-pill animate__animated animate__fadeInRight">
+                          <i class="bi bi-check-circle"></i> <%= e.dateRetour.toLocaleDateString() %>
+                        </span>
+                      <% } else { %>
+                        <span class="badge bg-warning bg-opacity-25 text-warning px-3 py-2 rounded-pill animate__animated animate__flash animate__infinite">
+                          <i class="bi bi-clock-history"></i> Non retourné
+                        </span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (!e.dateRetour) { %>
+                        <button class="btn btn-success btn-sm rounded-pill px-4 fw-bold shadow animate__animated animate__pulse animate__infinite"
+                                onclick="retournerLivre('<%= e._id %>')">
+                          <i class="bi bi-arrow-return-left"></i> Retourner
+                        </button>
+                      <% } else { %>
+                        <span class="badge bg-gradient-to-r from-green-200 to-green-100 text-success px-3 py-2 rounded-pill animate__animated animate__fadeIn">
+                          Retourné
+                        </span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Animate.css CDN for modern animations -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+  /* Custom gradient animation for title */
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+  .text-gradient {
+    background-size: 200% 200%;
+    animation: gradientMove 3s infinite alternate;
+  }
+</style>
+<script>
+  function retournerLivre(empruntId) {
+    fetch(`/api/emprunts/return/${empruntId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Erreur lors du retour du livre.');
+      }
+    })
+    .catch(error => {
+      console.error('Erreur:', error);
+      alert('Erreur lors du retour du livre.');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const res = await fetch(`/api/emprunts/user`);
+    if (res.ok) {
+      const data = await res.json();
+      const overdue = data.emprunts.filter(e => !e.dateRetour && new Date(e.dateEmprunt) < new Date(Date.now() - 14*24*60*60*1000));
+      if (overdue.length > 0) {
+        document.getElementById('overdue-user-alert').innerHTML = `
+          <div class="alert alert-warning d-flex align-items-center gap-2 shadow-sm rounded-3 animate__animated animate__shakeX" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+            <div>
+              <b>Attention !</b> Vous avez ${overdue.length} emprunt(s) en retard.
+            </div>
+          </div>
+        `;
+      }
+    }
+  });
+</script>

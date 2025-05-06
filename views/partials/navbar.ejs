@@ -49,61 +49,31 @@
   function createNavItem(href, text, extra = '') {
     return `<li class="nav-item"><a class="nav-link" href="${href}" ${extra}>${text}</a></li>`;
   }
-  // Helper to create dropdown for admin
-  function createAdminDropdown(userId) {
-    return `
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          Admin
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown" style="background: #2575fc;">
-          <li><a class="dropdown-item" href="/admin/users?userId=${userId}">Utilisateurs</a></li>
-          <li><a class="dropdown-item" href="/admin/orders?userId=${userId}">Commandes</a></li>
-          <li><a class="dropdown-item" href="/admin/stock?userId=${userId}">Stock</a></li>
-        </ul>
-      </li>
-    `;
-  }
   // Render navbar links based on user
   async function renderNavbarLinks() {
-    const userId = localStorage.getItem('userId');
+    // No more userId in localStorage or URLs
     const nav = document.getElementById('dynamic-navbar-links');
     let html = '';
     let isAdmin = false;
-    if (userId) {
-      // Dashboard button styled as regular nav item
-      html += createNavItem(`/dashboard?userId=${userId}`, 'Dashboard');
-      html += createNavItem(`/books`, 'livres');
-      html += createNavItem(`/cart?userId=${userId}`, 'Panier');
-      html += createNavItem(`/orders?userId=${userId}`, 'Commandes');
-      html += createNavItem(`/profile?userId=${userId}`, 'Profil');
-      
-      html += createNavItem(`/books/manage?userId=${userId}`, 'Gestion des Livres');
-      html += createNavItem(`/orders/manage?userId=${userId}`, 'Gestion des Commandes');
-      // Check for admin role by verifying with /api/users endpoint (MongoDB check)
-      try {
-        const res = await fetch(`/api/users?userId=${userId}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await res.json();
-        if (
-          data.user &&
-          data.user.role === 1 &&
-          data.user.email === "AdminAdmin@gmail.com"
-        ) {
-          isAdmin = true;
-          // Only show Gestion des Utilisateurs if logged in as AdminAdmin@gmail.com
-          html += createNavItem(`/admin/users?userId=${userId}`, 'Gestion des Utilisateurs');
-          html += createAdminDropdown(userId);
-        }
-      } catch (e) {}
-      html += createNavItem('#', 'Déconnexion', 'onclick="logout();return false;"');
-    } else {
-      html += createNavItem('/login', 'Connexion');
-      html += createNavItem('/register', 'Inscription');
-    }
-    nav.innerHTML += html;
+    // You may want to fetch /api/users/me or rely on server-side rendering for user info
+    // For now, just show static links
+    html += createNavItem('/dashboard', 'Dashboard');
+    html += createNavItem('/books', 'Livres');
+    html += createNavItem('/emprunts', 'Emprunts');
+    html += createNavItem('/cart', 'Panier');
+    html += createNavItem('/orders', 'Commandes');
+    html += createNavItem('/profile', 'Profil');
+    html += createNavItem('/books/manage', 'Gestion des Livres');
+    html += createNavItem('/orders/manage', 'Gestion des Commandes');
+ 
+    
+    // If admin, add admin links (you may need to check user role server-side)
+    // html += createNavItem('/admin/users', 'Gestion des Utilisateurs');
+    // html += createNavItem('/admin/orders', 'Gestion des Commandes');
+    // html += createNavItem('/admin/stock', 'Stock');
+    // html += createNavItem('/admin/emprunts', 'Gestion Emprunts');
+    html += createNavItem('#', 'Déconnexion', 'onclick="logout();return false;"');
+    nav.innerHTML = html;
   }
   document.addEventListener('DOMContentLoaded', renderNavbarLinks);
 </script>

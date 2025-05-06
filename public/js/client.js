@@ -40,17 +40,23 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
-  const res = await fetch('/api/users/login', {
+  const res = await fetch('/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
   });
-  const data = await res.json();
-  if (res.ok) {
-    localStorage.setItem('userId', data.userId);
-    window.location.href = `${data.redirectUrl}?userId=${data.userId}`;
+  // If login is handled by server-side redirect, just reload
+  if (res.redirected) {
+    window.location.href = res.url;
+    return;
+  }
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && data.redirectUrl) {
+    window.location.href = data.redirectUrl;
+  } else if (data.message) {
+    showNotification(data.message, 'error');
   } else {
-    showNotification(data.message || 'Erreur lors de la connexion', 'error');
+    showNotification('Erreur lors de la connexion', 'error');
   }
 });
 
@@ -67,8 +73,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
   });
   const data = await res.json();
   if (res.ok) {
-    localStorage.setItem('userId', data.userId);
-    window.location.href = `${data.redirectUrl}?userId=${data.userId}`;
+    window.location.href = '/login';
   } else {
     showNotification(data.message || 'Erreur lors de l’inscription', 'error');
   }
@@ -77,14 +82,13 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
 // Mise à jour du profil
 document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const userId = document.querySelector('input[name="userId"]').value;
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value || undefined;
   const res = await fetch('/api/users/profile', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, name, email, password })
+    body: JSON.stringify({ name, email, password })
   });
   const data = await res.json();
   if (res.ok) {
@@ -98,7 +102,6 @@ document.getElementById('profileForm')?.addEventListener('submit', async (e) => 
 // Ajouter un livre
 document.getElementById('addBookForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const userId = document.querySelector('input[name="userId"]').value;
   const title = document.getElementById('title').value;
   const author = document.getElementById('author').value;
   const genre = document.getElementById('genre').value;
@@ -123,9 +126,6 @@ document.getElementById('addBookForm')?.addEventListener('submit', async (e) => 
 async function editBook(bookId) {
   const row = document.querySelector(`tr[data-book-id="${bookId}"]`);
   const cells = row.getElementsByTagName('td');
-  const currentTitle = cells[0].innerText;
-  const currentAuthor = cells[1].innerText;
-  const currentGenre = cells[2].innerText;
   const currentPrice = cells[3].innerText;
   const currentStock = cells[4].innerText;
 
@@ -198,32 +198,17 @@ document.getElementById('searchBooksForm')?.addEventListener('submit', async (e)
 // Ajouter au panier
 document.getElementById('addToCartForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const userId = localStorage.getItem('userId');
+  // Ne plus utiliser userId, le backend utilise req.user via session
   const bookId = document.querySelector('input[name="bookId"]').value;
   const quantity = document.getElementById('quantity').value;
   const res = await fetch('/api/orders/cart', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, bookId, quantity })
-  });
-  const data = await res.json();
-  if (res.ok) window.location.href = `/cart?userId=${userId}`;
-  else showNotification(data.message || 'Erreur lors de l’ajout au panier', 'error');
-});
-
-document.getElementById('addToCartForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const userId = document.querySelector('input[name="userId"]').value;
-  const bookId = document.getElementById('bookId').value;
-  const quantity = document.getElementById('quantity').value;
-  const res = await fetch('/api/orders/cart', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, bookId, quantity })
+    body: JSON.stringify({ bookId, quantity })
   });
   const data = await res.json();
   if (res.ok) {
-    showNotification(data.message, 'success');
+    showNotification(data.message || 'Ajouté au panier', 'success');
     window.location.reload();
   } else {
     showNotification(data.message || 'Erreur lors de l’ajout au panier', 'error');
@@ -232,36 +217,60 @@ document.getElementById('addToCartForm')?.addEventListener('submit', async (e) =
 
 // Valider la commande
 async function checkout() {
-  const userId = localStorage.getItem('userId');
+  // Ne plus utiliser userId, le backend utilise req.user via session
   const res = await fetch('/api/orders/checkout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId })
+    headers: { 'Content-Type': 'application/json' }
   });
   const data = await res.json();
-  if (res.ok) window.location.href = `/orders?userId=${userId}`;
+  if (res.ok) window.location.href = `/orders`;
   else showNotification(data.message || 'Erreur lors de la validation', 'error');
 }
-async function checkout() {
-  const userId = localStorage.getItem('userId');
-  const res = await fetch('/api/orders/checkout', {
+
+// Emprunter un livre
+async function emprunterLivre(bookId) {
+  // Ne plus utiliser userId, le backend utilise req.user via session
+  // Vérifier si déjà emprunté
+  const resCheck = await fetch(`/api/emprunts/user`);
+  const dataCheck = await resCheck.json();
+  if (resCheck.ok && dataCheck.emprunts.some(e => e.book._id === bookId && !e.dateRetour)) {
+    showNotification('Vous avez déjà emprunté ce livre et ne l\'avez pas encore retourné.', 'warning');
+    return;
+  }
+  // Emprunter
+  const res = await fetch('/api/emprunts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ bookId })
   });
   const data = await res.json();
   if (res.ok) {
-    showNotification(data.message, 'success');
-    window.location.reload();
+    showNotification('Livre emprunté avec succès', 'success');
+    window.location.href = '/emprunts';
   } else {
-    showNotification(data.message || 'Erreur lors de la validation', 'error');
+    showNotification(data.message || 'Erreur lors de l\'emprunt', 'error');
+  }
+}
+
+// Return book from emprunt page (AJAX)
+async function retournerLivre(empruntId) {
+  const res = await fetch(`/api/emprunts/return/${empruntId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  const data = await res.json();
+  if (res.ok) {
+    showNotification('Livre retourné avec succès', 'success');
+    setTimeout(() => window.location.reload(), 1000);
+  } else {
+    showNotification(data.message || 'Erreur lors du retour', 'error');
   }
 }
 
 // Déconnexion
 function logout() {
-  localStorage.removeItem('userId');
-  window.location.href = '/';
+  // Nettoyer le localStorage si besoin, puis rediriger
+  window.location.href = '/logout';
 }
 
 // Gestion des utilisateurs (activer/désactiver)
