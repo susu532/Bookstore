@@ -67,6 +67,11 @@
   </style>
 </head>
 <body>
+  <% if (!user) { %>
+    <script>
+      window.location.href = '/login';
+    </script>
+  <% } %>
   <%- include('../partials/navbar', { user }) %>
   <div class="container py-5">
     <div class="row g-4">
