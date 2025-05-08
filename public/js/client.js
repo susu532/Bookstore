@@ -123,12 +123,7 @@ document.getElementById('addBookForm')?.addEventListener('submit', async (e) => 
 });
 
 // Modifier un livre
-async function editBook(bookId) {
-  const row = document.querySelector(`tr[data-book-id="${bookId}"]`);
-  const cells = row.getElementsByTagName('td');
-  const currentPrice = cells[3].innerText;
-  const currentStock = cells[4].innerText;
-
+async function editBook(bookId, currentTitle, currentAuthor, currentGenre, currentPrice, currentStock) {
   const newTitle = prompt('Nouveau titre :', currentTitle) || currentTitle;
   const newAuthor = prompt('Nouvel auteur :', currentAuthor) || currentAuthor;
   const newGenre = prompt('Nouveau genre :', currentGenre) || currentGenre;

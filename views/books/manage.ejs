@@ -151,7 +151,16 @@
                       <% } %>
                     </td>
                     <td>
-                      <button onclick="editBook('<%= book._id %>')" class="btn btn-sm btn-primary me-1" title="Modifier">
+                      <button
+                        onclick="editBook(
+                          '<%= book._id %>',
+                          '<%- book.title.replace(/'/g, '\\&#39;') %>',
+                          '<%- book.author.replace(/'/g, '\\&#39;') %>',
+                          '<%- book.genre.replace(/'/g, '\\&#39;') %>',
+                          '<%= book.price %>',
+                          '<%= book.stock %>'
+                        )"
+                        class="btn btn-sm btn-primary me-1" title="Modifier">
                         <i class="bi bi-pencil-square"></i>
                       </button>
                       <button onclick="deleteBook('<%= book._id %>')" class="btn btn-sm btn-danger me-1" title="Supprimer">
