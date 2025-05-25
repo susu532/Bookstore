@@ -54,11 +54,12 @@
     const nav = document.getElementById('dynamic-navbar-links');
     let html = '';
     let isAdmin = false;
-    <% if (user && user.role === 1) { %>
-    html += createNavItem('/emprunts', 'Emprunts');
-    <% } %>
+  
     html += createNavItem('/dashboard', 'Dashboard');
     html += createNavItem('/books', 'Livres');
+     <% if (user && user.role === 1) { %>
+    html += createNavItem('/emprunts', 'Emprunts');
+    <% } %>
     html += createNavItem('/cart', 'Panier');
     html += createNavItem('/orders', 'Commandes');
     html += createNavItem('/profile', 'Profil');
