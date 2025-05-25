@@ -128,7 +128,8 @@ app.get('/orders/manage', checkAuth, async (req, res) => {
   const books = await require('./models/Book').find({ stock: { $gt: 0 } });
   res.render('orders/manage', { user: req.user, cart: cart || { books: [] }, orders, books });
 });
-app.get('/emprunts', checkAuth, async (req, res) => {
+// Restrict emprunts page to admin only
+app.get('/emprunts', checkAuth, checkAdmin, async (req, res) => {
   const Emprunt = require('./models/Emprunt');
   const emprunts = await Emprunt.find({ user: req.user._id }).populate('book');
   res.render('emprunts', { user: req.user, emprunts });

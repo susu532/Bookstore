@@ -51,15 +51,14 @@
   }
   // Render navbar links based on user
   async function renderNavbarLinks() {
-    // No more userId in localStorage or URLs
     const nav = document.getElementById('dynamic-navbar-links');
     let html = '';
     let isAdmin = false;
-    // You may want to fetch /api/users/me or rely on server-side rendering for user info
-    // For now, just show static links
+    <% if (user && user.role === 1) { %>
+    html += createNavItem('/emprunts', 'Emprunts');
+    <% } %>
     html += createNavItem('/dashboard', 'Dashboard');
     html += createNavItem('/books', 'Livres');
-    html += createNavItem('/emprunts', 'Emprunts');
     html += createNavItem('/cart', 'Panier');
     html += createNavItem('/orders', 'Commandes');
     html += createNavItem('/profile', 'Profil');
