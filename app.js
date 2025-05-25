@@ -118,7 +118,7 @@ app.get('/orders', checkAuth, async (req, res) => {
   res.render('orders', { orders, user: req.user });
 });
 app.get('/dashboard', checkAuth, (req, res) => res.render('dashboard', { user: req.user }));
-app.get('/books/manage', checkAuth, async (req, res) => {
+app.get('/books/manage', checkAuth, checkAdmin, async (req, res) => {
   const books = await require('./models/Book').find();
   res.render('books/manage', { user: req.user, books });
 });

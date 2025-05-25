@@ -67,9 +67,9 @@
   </style>
 </head>
 <body>
-  <% if (!user) { %>
+  <% if (!user || user.role !== 1) { %>
     <script>
-      window.location.href = '/login';
+      window.location.href = '/dashboard';
     </script>
   <% } %>
   <%- include('../partials/navbar', { user }) %>
