@@ -10,6 +10,9 @@
             Gestion des Emprunts (Admin)
           </h1>
         </div>
+        <% if (!user || user.role !== 1) { %>
+          <div class="alert alert-danger">Accès refusé : réservé à l'administrateur.</div>
+        <% } else { %>
         <div id="overdue-user-alert" class="mb-4"></div>
         <div class="table-responsive">
           <table class="table table-hover align-middle rounded-3 overflow-hidden shadow-sm animate__animated animate__fadeIn">
@@ -69,6 +72,7 @@
             </tbody>
           </table>
         </div>
+        <% } %>
       </div>
     </div>
   </div>
@@ -106,20 +110,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const res = await fetch(`/api/emprunts/user`);
-    if (res.ok) {
-      const data = await res.json();
-      const overdue = data.emprunts.filter(e => !e.dateRetour && new Date(e.dateEmprunt) < new Date(Date.now() - 14*24*60*60*1000));
-      if (overdue.length > 0) {
-        document.getElementById('overdue-user-alert').innerHTML = `
-          <div class="alert alert-warning d-flex align-items-center gap-2 shadow-sm rounded-3 animate__animated animate__shakeX" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
-            <div>
-              <b>Attention !</b> Vous avez ${overdue.length} emprunt(s) en retard.
-            </div>
-          </div>
-        `;
-      }
-    }
+    // Optionally, you can fetch overdue stats for admin here
   });
 </script>

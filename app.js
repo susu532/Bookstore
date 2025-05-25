@@ -76,6 +76,12 @@ const checkAuth = (req, res, next) => {
   return res.redirect('/login');
 };
 
+// Admin check middleware
+const checkAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 1) return res.status(403).render('error', { message: 'Accès refusé', user: req.user || null });
+  next();
+};
+
 // Login route (POST)
 app.post('/login', async (req, res, next) => {
   const { email, password } = req.body;
@@ -131,16 +137,11 @@ app.get('/orders/manage', checkAuth, async (req, res) => {
 // Restrict emprunts page to admin only
 app.get('/emprunts', checkAuth, checkAdmin, async (req, res) => {
   const Emprunt = require('./models/Emprunt');
-  const emprunts = await Emprunt.find({ user: req.user._id }).populate('book');
+  const emprunts = await Emprunt.find().populate('book');
   res.render('emprunts', { user: req.user, emprunts });
 });
 
 // Routes Admin
-const checkAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 1) return res.status(403).json({ message: 'Accès refusé' });
-  next();
-};
-
 app.get('/admin/users', checkAuth, checkAdmin, async (req, res) => {
   const users = await User.find().select('-password');
   res.render('admin/users', { users, user: req.user });
