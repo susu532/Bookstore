@@ -1,51 +1,162 @@
 <%- include('../partials/navbar', { user }) %>
+<style>
+  body {
+    background: #f6f8fa;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  }
+  .modern-card {
+    background: #fff;
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 24px 0 rgba(60,72,88,0.08);
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    border: none;
+  }
+  .modern-table {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px 0 rgba(60,72,88,0.06);
+    overflow: hidden;
+  }
+  .modern-table th, .modern-table td {
+    border: none;
+    padding: 1rem 1.2rem;
+    vertical-align: middle;
+  }
+  .modern-table thead {
+    background: linear-gradient(90deg, #4f8cff 0%, #6dd5ed 100%);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .modern-table tbody tr {
+    transition: background 0.2s;
+  }
+  .modern-table tbody tr:hover {
+    background: #f0f6ff;
+  }
+  .badge-modern {
+    font-size: 0.95em;
+    border-radius: 1rem;
+    padding: 0.5em 1.1em;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .badge-success {
+    background: #e6f9f0;
+    color: #1a7f5a;
+  }
+  .badge-warning {
+    background: #fff7e6;
+    color: #b26a00;
+  }
+  .badge-info {
+    background: #e6f0fa;
+    color: #2a5d9f;
+  }
+  .badge-returned {
+    background: linear-gradient(90deg, #b2f7ef 0%, #e0fcff 100%);
+    color: #1a7f5a;
+  }
+  .btn-modern {
+    border-radius: 2rem;
+    padding: 0.5em 1.5em;
+    font-weight: 600;
+    background: linear-gradient(90deg, #4f8cff 0%, #6dd5ed 100%);
+    color: #fff;
+    border: none;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(79,140,255,0.08);
+  }
+  .btn-modern:hover {
+    background: linear-gradient(90deg, #357ae8 0%, #48c6ef 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px 0 rgba(79,140,255,0.15);
+  }
+  .overdue-card {
+    background: linear-gradient(90deg, #ffdde1 0%, #ee9ca7 100%);
+    color: #a94442;
+    border-radius: 1rem;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px 0 rgba(238,156,167,0.08);
+  }
+  .modern-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2a5d9f;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.01em;
+  }
+</style>
 <div class="container">
-  <h1>Gestion des Emprunts</h1>
-  <div id="emprunt-stats" class="mb-6"></div>
-  <div id="overdue-alerts" class="mb-6"></div>
-  <table class="table table-hover align-middle">
-    <thead>
-      <tr>
-        <th>Utilisateur</th>
-        <th>Livre</th>
-        <th>Date d'emprunt</th>
-        <th>Date de retour</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% emprunts.forEach(e => { %>
+  <h1 class="modern-title">Gestion des Emprunts</h1>
+  <div id="emprunt-stats" class="mb-4"></div>
+  <div id="overdue-alerts" class="mb-4"></div>
+  <div class="modern-card">
+    <table class="table modern-table align-middle">
+      <thead>
         <tr>
-          <td><%= e.user.name %> (<%= e.user.email %>)</td>
-          <td><%= e.book.title %></td>
-          <td><%= e.dateEmprunt.toLocaleDateString() %></td>
-          <td>
-            <% if (e.dateRetour) { %>
-              <span class="badge bg-success bg-opacity-25 text-success px-3 py-2 rounded-pill">
-                <i class="bi bi-check-circle"></i> <%= e.dateRetour.toLocaleDateString() %>
-              </span>
-            <% } else { %>
-              <span class="badge bg-warning bg-opacity-25 text-warning px-3 py-2 rounded-pill">
-                <i class="bi bi-clock-history"></i> Non retourné
-              </span>
-            <% } %>
-          </td>
-          <td>
-            <% if (!e.dateRetour) { %>
-              <button class="btn btn-success btn-sm rounded-pill px-4 fw-bold"
-                      onclick="retournerLivre('<%= e._id %>')">
-                <i class="bi bi-arrow-return-left"></i> Retourner
-              </button>
-            <% } else { %>
-              <span class="badge bg-gradient-to-r from-green-200 to-green-100 text-success px-3 py-2 rounded-pill">
-                Retourné
-              </span>
-            <% } %>
-          </td>
+          <th>Utilisateur</th>
+          <th>Livre</th>
+          <th>Date d'emprunt</th>
+          <th>Date de retour</th>
+          <th>Action</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% emprunts.forEach(e => { %>
+          <tr>
+            <td>
+              <span class="badge-modern badge-info">
+                <i class="bi bi-person-circle"></i>
+                <%= e.user.name %>
+              </span>
+              <br>
+              <small style="color:#6c757d;"><%= e.user.email %></small>
+            </td>
+            <td>
+              <span class="badge-modern badge-info">
+                <i class="bi bi-book"></i>
+                <%= e.book.title %>
+              </span>
+            </td>
+            <td>
+              <span class="badge-modern badge-info">
+                <i class="bi bi-calendar-event"></i>
+                <%= e.dateEmprunt.toLocaleDateString() %>
+              </span>
+            </td>
+            <td>
+              <% if (e.dateRetour) { %>
+                <span class="badge-modern badge-success">
+                  <i class="bi bi-check-circle"></i> <%= e.dateRetour.toLocaleDateString() %>
+                </span>
+              <% } else { %>
+                <span class="badge-modern badge-warning">
+                  <i class="bi bi-clock-history"></i> Non retourné
+                </span>
+              <% } %>
+            </td>
+            <td>
+              <% if (!e.dateRetour) { %>
+                <button class="btn btn-modern btn-sm"
+                        onclick="retournerLivre('<%= e._id %>')">
+                  <i class="bi bi-arrow-return-left"></i> Retourner
+                </button>
+              <% } else { %>
+                <span class="badge-modern badge-returned">
+                  <i class="bi bi-check2-all"></i> Retourné
+                </span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -54,11 +165,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (statsRes.ok) {
     const stats = await statsRes.json();
     document.getElementById('emprunt-stats').innerHTML = `
-      <div class="card">
-        <b>Total emprunts :</b> ${stats.total} &nbsp; | 
-        <b>En cours :</b> ${stats.actifs} &nbsp; | 
-        <b>Retournés :</b> ${stats.returned} <br>
-        <b>Top livres :</b> ${stats.topBooks.map(b => `${b.title} (${b.count})`).join(', ')}
+      <div class="modern-card" style="display:flex;flex-wrap:wrap;gap:2rem;align-items:center;justify-content:space-between;">
+        <div>
+          <span class="badge-modern badge-info"><b>Total emprunts :</b> ${stats.total}</span>
+          <span class="badge-modern badge-warning"><b>En cours :</b> ${stats.actifs}</span>
+          <span class="badge-modern badge-success"><b>Retournés :</b> ${stats.returned}</span>
+        </div>
+        <div>
+          <span class="badge-modern badge-info"><b>Top livres :</b> ${stats.topBooks.map(b => `${b.title} (${b.count})`).join(', ')}</span>
+        </div>
       </div>
     `;
   }
@@ -68,10 +183,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await overdueRes.json();
     if (data.emprunts.length > 0) {
       document.getElementById('overdue-alerts').innerHTML = `
-        <div class="card bg-red-100 text-red-800">
+        <div class="overdue-card">
           <b>Emprunts en retard :</b>
-          <ul>
-            ${data.emprunts.map(e => `<li>${e.user.name} - ${e.book.title} (depuis le ${new Date(e.dateEmprunt).toLocaleDateString()})</li>`).join('')}
+          <ul style="margin:0.5em 0 0 1.2em;">
+            ${data.emprunts.map(e => `<li><b>${e.user.name}</b> - <i>${e.book.title}</i> <span style="color:#a94442;">(depuis le ${new Date(e.dateEmprunt).toLocaleDateString()})</span></li>`).join('')}
           </ul>
         </div>
       `;
