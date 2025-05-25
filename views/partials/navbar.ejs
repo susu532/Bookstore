@@ -61,11 +61,14 @@
     html += createNavItem('/cart', 'Panier');
     html += createNavItem('/orders', 'Commandes');
     html += createNavItem('/profile', 'Profil');
+    
+    html += createNavItem('/orders/manage', 'Gestion des Commandes');
     <% if (user && user.role === 1) { %>
     html += createNavItem('/books/manage', 'Gestion des Livres');
     html += createNavItem('/admin/emprunts', 'Gestion des Emprunts');
-    <% } %>
-    html += createNavItem('/orders/manage', 'Gestion des Commandes');
+    html += createNavItem('/admin/users?userId=<%= user._id %>', 'Gestion des utilisateurs');
+    <% } %> 
+  
  
     
     // If admin, add admin links (you may need to check user role server-side)
