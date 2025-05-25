@@ -7,12 +7,9 @@
           <i class="bi bi-journal-bookmark-fill fs-2 text-primary me-3 animate__animated animate__bounceIn"></i>
           <h1 class="mb-0 fw-bold text-gradient"
               style="background: linear-gradient(90deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent; animation: gradientMove 3s infinite alternate;">
-            Gestion des Emprunts (Admin)
+            Mes Emprunts
           </h1>
         </div>
-        <% if (!user || user.role !== 1) { %>
-          <div class="alert alert-danger">Accès refusé : réservé à l'administrateur.</div>
-        <% } else { %>
         <div id="overdue-user-alert" class="mb-4"></div>
         <div class="table-responsive">
           <table class="table table-hover align-middle rounded-3 overflow-hidden shadow-sm animate__animated animate__fadeIn">
@@ -72,7 +69,6 @@
             </tbody>
           </table>
         </div>
-        <% } %>
       </div>
     </div>
   </div>
@@ -108,8 +104,4 @@
       alert('Erreur lors du retour du livre.');
     });
   }
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Optionally, you can fetch overdue stats for admin here
-  });
 </script>
