@@ -111,6 +111,16 @@
       <p>Ceci est votre tableau de bord utilisateur. Gérez vos livres, commandes et panier facilement.</p>
     </div>
     <div class="dashboard-cards">
+      <% if (user && user.role === 1) { %>
+      <div class="dashboard-card shadow-sm">
+        <div class="icon bg-gradient">
+          <i class="bi bi-journal-text"></i>
+        </div>
+        <h5 class="mt-3 mb-2">Gestion des livres</h5>
+        <p>Ajoutez, modifiez ou supprimez des livres dans la bibliothèque.</p>
+        <a href="/books/manage" class="btn btn-warning w-100">Gérer les livres</a>
+      </div>
+      <% } %>
       <div class="dashboard-card shadow-sm">
         <div class="icon bg-gradient">
           <i class="bi bi-book-half"></i>
@@ -144,4 +154,3 @@
   <script src="/js/client.js"></script>
 </body>
 </html>
-``` 
