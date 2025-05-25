@@ -63,7 +63,9 @@
     html += createNavItem('/cart', 'Panier');
     html += createNavItem('/orders', 'Commandes');
     html += createNavItem('/profile', 'Profil');
+    <% if (user && user.role === 1) { %>
     html += createNavItem('/books/manage', 'Gestion des Livres');
+    <% } %>
     html += createNavItem('/orders/manage', 'Gestion des Commandes');
  
     
