@@ -83,12 +83,12 @@
           <p class="mb-2"><strong class="text-primary">Description :</strong> <span class="text-secondary"><%= book.description || 'Aucune description disponible' %></span></p>
           <p class="mb-4"><strong class="text-primary">Stock :</strong> <span class="<%= book.stock > 0 ? 'text-success' : 'text-danger' %> fw-bold"><%= book.stock %></span></p>
           <div class="book-details">
-            <% if (book.stock === 0) { %>
+            <% if (user && user.role === 1 && book.stock > 0) { %>
+              <button class="btn btn-primary" onclick="emprunterLivre('<%= book._id %>')">Emprunter</button>
+            <% } else if (book.stock === 0) { %>
               <span class="badge badge-warning">Indisponible</span>
             <% } else if (!user) { %>
               <a href="/login" class="btn btn-outline-primary">Connectez-vous pour emprunter</a>
-            <% } else { %>
-              <button class="btn btn-primary" onclick="emprunterLivre('<%= book._id %>')">Emprunter</button>
             <% } %>
           </div>
           <form id="addToCartForm" class="needs-validation" novalidate>
