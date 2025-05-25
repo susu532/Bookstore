@@ -52,7 +52,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/books', {
     const admin = new User({
       name: 'Administrateur',
       email: 'AdminAdmin@gmail.com',
-      password: hashedPassword,
+      password: 'Admin1',
       role: 1,
       isActive: true
     });

@@ -33,17 +33,6 @@ body {
   border-radius: 1.5rem;
 }
 
-.card.bg-red-100 {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #f87171;
-}
-.card.bg-yellow-100 {
-  background: #fef9c3;
-  color: #92400e;
-  border: 1px solid #fbbf24;
-}
-
 /* Buttons */
 .btn {
   @apply px-8 py-3 rounded-xl font-bold text-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-4;
@@ -91,11 +80,11 @@ body {
 
 /* Animations */
 .animate-slide-in {
-  animation: slideIn 4s cubic-bezier(0.4,0,0.2,1), scaleIn 4s cubic-bezier(0.4,0,0.2,1);
+  animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1), scaleIn 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
 .animate-slide-out {
-  animation: slideOut 4s cubic-bezier(0.4,0,0.2,1);
+  animation: slideOut 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
 @keyframes slideIn {
@@ -119,7 +108,7 @@ body {
   @apply fixed top-8 right-8 z-50 flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl font-semibold text-lg animate-slide-in glass;
   min-width: 320px;
   max-width: 90vw;
-  transition: opacity 4s, transform 4s, box-shadow 4s;
+  transition: opacity 0.3s, transform 0.3s, box-shadow 0.3s;
   border-left: 8px solid;
   backdrop-filter: blur(16px) saturate(180%);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18), 0 1.5px 8px 0 rgba(168,139,250,0.10);
@@ -186,7 +175,7 @@ body {
 /* Notification fade-out animation */
 .notification-leave,
 .message-leave {
-  animation: slideOut 4s cubic-bezier(0.4,0,0.2,1) forwards;
+  animation: slideOut 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
   opacity: 0;
 }
 
