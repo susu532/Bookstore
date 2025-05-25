@@ -54,17 +54,16 @@
     const nav = document.getElementById('dynamic-navbar-links');
     let html = '';
     let isAdmin = false;
-  
+
     html += createNavItem('/dashboard', 'Dashboard');
     html += createNavItem('/books', 'Livres');
-     
     html += createNavItem('/emprunts', 'Emprunts');
-    
     html += createNavItem('/cart', 'Panier');
     html += createNavItem('/orders', 'Commandes');
     html += createNavItem('/profile', 'Profil');
     <% if (user && user.role === 1) { %>
     html += createNavItem('/books/manage', 'Gestion des Livres');
+    html += createNavItem('/admin/emprunts', 'Gestion des Emprunts');
     <% } %>
     html += createNavItem('/orders/manage', 'Gestion des Commandes');
  
