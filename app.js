@@ -78,7 +78,7 @@ const checkAuth = (req, res, next) => {
 
 // Admin check middleware
 const checkAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 1) return res.status(403).render('error', { message: 'Accès refusé', user: req.user || null });
+  if (!req.user || req.user.role !== 1) return res.status(403).render('error', { message: 'Accèss refusé', user: req.user || null });
   next();
 };
 
