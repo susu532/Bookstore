@@ -22,7 +22,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'echo "Construire l'application..."'
+                sh 'npm run build'
             }
         }
 
@@ -31,7 +31,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh './scripts/deploy.sh'
+                sh 'echo "Déploiement fictif : ajoutez vos commandes de déploiement ici."'
             }
         }
     }
