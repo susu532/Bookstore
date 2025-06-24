@@ -149,25 +149,54 @@
 
     // Charger toutes les commandes au chargement de la page
     async function loadAllOrders() {
-      const res = await fetch('/api/admin/orders');
-      const orders = await res.json();
-      renderOrders(orders);
+      try {
+        const res = await fetch('/api/admin/orders');
+        if (!res.ok) throw new Error('Erreur lors du chargement des commandes');
+        const orders = await res.json();
+        renderOrders(orders);
+      } catch (err) {
+        document.getElementById('ordersList').innerHTML = `<div class="alert alert-danger text-center mt-4 shadow-sm" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Erreur lors du chargement des commandes.
+        </div>`;
+      }
     }
     document.addEventListener('DOMContentLoaded', loadAllOrders);
 
     // Recherche dynamique
-    document.getElementById('orderSearchInput').addEventListener('input', function() {
-      const value = this.value.toLowerCase();
-      document.querySelectorAll('.order-item').forEach(function(item) {
-        const user = item.getAttribute('data-user');
-        const books = item.getAttribute('data-books');
-        if (user.includes(value) || books.includes(value)) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
+    const orderSearchInput = document.getElementById('orderSearchInput');
+    if (orderSearchInput) {
+      orderSearchInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        document.querySelectorAll('.order-item').forEach(function(item) {
+          const user = item.getAttribute('data-user') || '';
+          const books = item.getAttribute('data-books') || '';
+          if (user.includes(value) || books.includes(value)) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        });
       });
-    });
+    }
+
+    // Charger tous les emprunts au chargement de la page (si affichage des emprunts requis sur cette page)
+    async function loadAllEmprunts() {
+      try {
+        const res = await fetch('/api/admin/emprunts');
+        if (!res.ok) throw new Error('Erreur lors du chargement des emprunts');
+        const emprunts = await res.json();
+        // Ajoutez ici le rendu dynamique des emprunts si besoin, par exemple :
+        // renderEmprunts(emprunts);
+        // (À compléter selon la structure d'affichage souhaitée)
+        // Pour l'instant, affichage console pour debug :
+        console.log('Emprunts chargés:', emprunts);
+      } catch (err) {
+        // Affichage d'une erreur dans la console ou dans le DOM si besoin
+        console.error('Erreur lors du chargement des emprunts');
+      }
+    }
+    // Décommentez la ligne suivante si vous souhaitez charger les emprunts au chargement de la page :
+    // document.addEventListener('DOMContentLoaded', loadAllEmprunts);
   </script>
 </body>
 </html>

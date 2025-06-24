@@ -136,14 +136,20 @@
 <% } %>
   <script src="/js/client.js"></script>
   <script>
-    // Helper to get the correct image URL for a book
+    // Helper to get the correct image URL for a book (support uploaded avatars and uploaded book covers)
     function getBookImageUrl(image) {
       if (!image || image.trim() === '') {
         return '/images/books/default-cover.png';
       }
+      // If image is an uploaded avatar or uploaded book cover
+      if (image.startsWith('/uploads/avatars/') || image.startsWith('/uploads/books/')) {
+        return image;
+      }
+      // If image is a full URL or absolute path
       if (image.startsWith('/') || image.startsWith('http')) {
         return image;
       }
+      // Default: images/books
       return '/images/books/' + image;
     }
 

@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Order = require('../models/Order');
+const Book = require('../models/Book');
+const Emprunt = require('../models/Emprunt');
 
 // Activer/Désactiver un utilisateur
 router.patch('/users/:userId', async (req, res) => {
@@ -58,6 +61,49 @@ router.delete('/users/:userId', async (req, res) => {
     res.json({ message: 'Utilisateur supprimé' });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// GET all users (for admin panel)
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// GET all orders (for admin panel)
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await Order.find().populate('user').populate('books.book');
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// GET all books (for admin stock panel)
+router.get('/stock', async (req, res) => {
+  try {
+    const books = await Book.find();
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// GET all emprunts (for admin panel)
+router.get('/emprunts', async (req, res) => {
+  try {
+    const emprunts = await Emprunt.find({})
+      .populate({ path: 'user', select: 'name email', options: { strictPopulate: false } })
+      .populate({ path: 'book', select: 'title', options: { strictPopulate: false } });
+    res.json(emprunts);
+  } catch (err) {
+    console.error('Erreur /api/admin/emprunts:', err);
+    res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }
 });
 

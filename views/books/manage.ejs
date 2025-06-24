@@ -181,9 +181,12 @@
             </div>
             <div class="mb-3">
               <label for="image" class="form-label">Image de couverture</label>
-              <input type="file" class="form-control" id="image" name="image" accept="image/*">
-              <div class="mt-2">
-                <img id="imagePreview" src="/images/books/default-cover.png" alt="Aperçu" style="max-width:100px;max-height:130px;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;">
+              <div id="dropZone" style="border:2px dashed #6366f1;border-radius:0.5rem;padding:1.5rem;text-align:center;cursor:pointer;background:#f8fafc;transition:background 0.2s;">
+                <span id="dropZoneText"><i class="bi bi-cloud-arrow-up fs-3"></i><br>Glissez-déposez une image ici ou cliquez pour sélectionner</span>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*" style="display:none;">
+                <div class="mt-2">
+                  <img id="imagePreview" src="/images/books/default-cover.png" alt="Aperçu" style="max-width:100px;max-height:130px;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;">
+                </div>
               </div>
             </div>
             <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Ajouter le Livre</button>
@@ -226,6 +229,61 @@
     </div>
   </div>
   
+  <!-- Edit Book Modal -->
+<div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editBookForm" autocomplete="off">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editBookModalLabel"><i class="bi bi-pencil-square me-2"></i>Modifier le Livre</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editBookId" name="bookId">
+          <div class="mb-3">
+            <label for="editTitle" class="form-label">Titre</label>
+            <input type="text" class="form-control" id="editTitle" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label for="editAuthor" class="form-label">Auteur</label>
+            <input type="text" class="form-control" id="editAuthor" name="author" required>
+          </div>
+          <div class="mb-3">
+            <label for="editGenre" class="form-label">Genre</label>
+            <input type="text" class="form-control" id="editGenre" name="genre" required>
+          </div>
+          <div class="mb-3">
+            <label for="editPrice" class="form-label">Prix (€)</label>
+            <input type="number" class="form-control" id="editPrice" name="price" step="0.01" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editDescription" name="description" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="editStock" class="form-label">Stock</label>
+            <input type="number" class="form-control" id="editStock" name="stock" min="0">
+          </div>
+          <div class="mb-3">
+            <label for="editImage" class="form-label">Image de couverture</label>
+            <div id="editDropZone" style="border:2px dashed #6366f1;border-radius:0.5rem;padding:1.5rem;text-align:center;cursor:pointer;background:#f8fafc;transition:background 0.2s;">
+              <span id="editDropZoneText"><i class="bi bi-cloud-arrow-up fs-3"></i><br>Glissez-déposez une image ici ou cliquez pour sélectionner</span>
+              <input type="file" class="form-control" id="editImage" name="image" accept="image/*" style="display:none;">
+              <div class="mt-2">
+                <img id="editImagePreview" src="/images/books/default-cover.png" alt="Aperçu" style="max-width:100px;max-height:130px;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
   <footer class="bg-white border-top py-4 mt-5">
     <div class="container text-center">
       <%- include('../partials/footer') %>
@@ -299,19 +357,192 @@
       renderBooks(books);
     });
 
-    document.getElementById('image').addEventListener('change', function(e) {
+    // Drag-and-drop UI for book cover upload
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropZone = document.getElementById('dropZone');
+      const fileInput = document.getElementById('image');
       const preview = document.getElementById('imagePreview');
+      const dropZoneText = document.getElementById('dropZoneText');
+      if (dropZone && fileInput) {
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', e => {
+          e.preventDefault();
+          dropZone.style.background = '#e0e7ff';
+        });
+        dropZone.addEventListener('dragleave', e => {
+          e.preventDefault();
+          dropZone.style.background = '#f8fafc';
+        });
+        dropZone.addEventListener('drop', e => {
+          e.preventDefault();
+          dropZone.style.background = '#f8fafc';
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+          }
+        });
+        fileInput.addEventListener('change', function(e) {
+          const file = this.files[0];
+          if (file && preview) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              preview.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+            dropZoneText.innerHTML = file.name;
+          } else if (preview) {
+            preview.src = '/images/books/default-cover.png';
+            dropZoneText.innerHTML = '<i class="bi bi-cloud-arrow-up fs-3"></i><br>Glissez-déposez une image ici ou cliquez pour sélectionner';
+          }
+        });
+      }
+    });
+
+    // AJAX upload logic for book cover
+    async function uploadBookCover(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/books/upload-cover', {
+        method: 'POST',
+        body: formData
+      });
+      if (!res.ok) throw new Error('Erreur lors de l\'upload de la couverture');
+      const data = await res.json();
+      return data.imageUrl; // relative path to use in book model
+    }
+
+    // Handle add book form submission with cover upload
+    document.addEventListener('DOMContentLoaded', function() {
+      const addBookForm = document.getElementById('addBookForm');
+      if (addBookForm) {
+        addBookForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const form = e.target;
+          const formData = new FormData(form);
+          const fileInput = document.getElementById('image');
+          let imageUrl = '';
+          if (fileInput && fileInput.files && fileInput.files[0]) {
+            try {
+              imageUrl = await uploadBookCover(fileInput.files[0]);
+            } catch (err) {
+              alert(err.message);
+              return;
+            }
+          }
+          // Add imageUrl to formData for backend
+          formData.set('image', imageUrl);
+          // Send the rest of the book data (except file) to your backend
+          const res = await fetch('/api/books', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert('Livre ajouté avec succès');
+            window.location.reload();
+          } else {
+            alert(data.message || 'Erreur lors de l\'ajout du livre');
+          }
+        });
+      }
+    });
+    // Edit Book Modal logic
+let currentEditImageUrl = '';
+function editBook(id, title, author, genre, price, stock) {
+  // Fetch book details for full info (including description, image)
+  fetch(`/api/books/${decodeURIComponent(id)}`)
+    .then(res => res.json())
+    .then(book => {
+      document.getElementById('editBookId').value = book._id;
+      document.getElementById('editTitle').value = book.title;
+      document.getElementById('editAuthor').value = book.author;
+      document.getElementById('editGenre').value = book.genre;
+      document.getElementById('editPrice').value = book.price;
+      document.getElementById('editDescription').value = book.description || '';
+      document.getElementById('editStock').value = book.stock;
+      currentEditImageUrl = book.image || '';
+      document.getElementById('editImagePreview').src = getBookImageUrl(currentEditImageUrl);
+      document.getElementById('editDropZoneText').innerHTML = '<i class="bi bi-cloud-arrow-up fs-3"></i><br>Glissez-déposez une image ici ou cliquez pour sélectionner';
+      // Reset file input
+      document.getElementById('editImage').value = '';
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('editBookModal'));
+      modal.show();
+    });
+}
+// Drag-and-drop for edit modal
+(function() {
+  const dropZone = document.getElementById('editDropZone');
+  const fileInput = document.getElementById('editImage');
+  const preview = document.getElementById('editImagePreview');
+  const dropZoneText = document.getElementById('editDropZoneText');
+  if (dropZone && fileInput) {
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.style.background = '#e0e7ff';
+    });
+    dropZone.addEventListener('dragleave', e => {
+      e.preventDefault();
+      dropZone.style.background = '#f8fafc';
+    });
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.style.background = '#f8fafc';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+      }
+    });
+    fileInput.addEventListener('change', function(e) {
       const file = this.files[0];
-      if (file) {
+      if (file && preview) {
         const reader = new FileReader();
         reader.onload = function(evt) {
           preview.src = evt.target.result;
         };
         reader.readAsDataURL(file);
-      } else {
-        preview.src = '/images/books/default-cover.png';
+        dropZoneText.innerHTML = file.name;
+      } else if (preview) {
+        preview.src = getBookImageUrl(currentEditImageUrl);
+        dropZoneText.innerHTML = '<i class="bi bi-cloud-arrow-up fs-3"></i><br>Glissez-déposez une image ici ou cliquez pour sélectionner';
       }
     });
+  }
+})();
+// Handle edit book form submission
+const editBookForm = document.getElementById('editBookForm');
+if (editBookForm) {
+  editBookForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const bookId = document.getElementById('editBookId').value;
+    const formData = new FormData(form);
+    let imageUrl = currentEditImageUrl;
+    const fileInput = document.getElementById('editImage');
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+      try {
+        imageUrl = await uploadBookCover(fileInput.files[0]);
+      } catch (err) {
+        alert(err.message);
+        return;
+      }
+    }
+    formData.set('image', imageUrl);
+    // Send update to backend
+    const res = await fetch(`/api/books/${bookId}`, {
+      method: 'PUT',
+      body: formData
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert('Livre modifié avec succès');
+      window.location.reload();
+    } else {
+      alert(data.message || 'Erreur lors de la modification du livre');
+    }
+  });
+}
   </script>
 </body>
 </html>

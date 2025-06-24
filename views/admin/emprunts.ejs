@@ -204,16 +204,20 @@
   function renderEmprunts(emprunts) {
     const tbody = document.getElementById('empruntsTableBody');
     tbody.innerHTML = '';
+    if (!Array.isArray(emprunts) || emprunts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="alert alert-info text-center">Aucun emprunt trouvé.</div></td></tr>`;
+      return;
+    }
     emprunts.forEach(e => {
       tbody.innerHTML += `
         <tr>
           <td>
             ${e.user ? `<span class="badge-modern badge-info"><i class="bi bi-person-circle"></i> ${e.user.name}</span><br><small style="color:#6c757d;">${e.user.email}</small>` : '<span class="badge bg-secondary">Utilisateur inconnu</span>'}
           </td>
-          <td><span class="badge-modern badge-info"><i class="bi bi-book"></i> ${e.book.title}</span></td>
-          <td><span class="badge-modern badge-info"><i class="bi bi-calendar-event"></i> ${new Date(e.dateEmprunt).toLocaleDateString()}</span></td>
+          <td><span class="badge-modern badge-info"><i class="bi bi-book"></i> ${e.book && e.book.title ? e.book.title : 'Livre inconnu'}</span></td>
+          <td><span class="badge-modern badge-info"><i class="bi bi-calendar-event"></i> ${e.dateEmprunt ? new Date(e.dateEmprunt).toLocaleDateString() : ''}</span></td>
           <td>
-            ${e.dateRetour ? `<span class="badge-modern badge-success"><i class="bi bi-check-circle"></i> ${new Date(e.dateRetour).toLocaleDateString()}</span>` : `<span class="badge-modern badge-warning"><i class="bi bi-clock-history"></i> Non retourné</span>`}
+            ${e.dateRetour ? `<span class="badge-modern badge-success"><i class="bi bi-check-circle"></i> ${new Date(e.dateRetour).toLocaleDateString()}` : `<span class="badge-modern badge-warning"><i class="bi bi-clock-history"></i> Non retourné`}
           </td>
           <td>
             ${!e.dateRetour ? `<button class="btn btn-modern btn-sm" onclick="retournerLivre('${e._id}')"><i class="bi bi-arrow-return-left"></i> Retourner</button>` : `<span class="badge-modern badge-returned"><i class="bi bi-check2-all"></i> Retourné</span>`}
@@ -225,9 +229,20 @@
 
   // Charger tous les emprunts
   async function loadAllEmprunts() {
-    const res = await fetch('/api/emprunts');
-    const emprunts = await res.json();
-    renderEmprunts(emprunts);
+    try {
+      const res = await fetch('/api/admin/emprunts');
+      if (!res.ok) throw new Error('Erreur lors du chargement des emprunts');
+      const emprunts = await res.json();
+      if (!Array.isArray(emprunts) || emprunts.length === 0) {
+        const tbody = document.getElementById('empruntsTableBody');
+        tbody.innerHTML = `<tr><td colspan="5"><div class="alert alert-info text-center">Aucun emprunt trouvé.</div></td></tr>`;
+        return;
+      }
+      renderEmprunts(emprunts);
+    } catch (err) {
+      const tbody = document.getElementById('empruntsTableBody');
+      tbody.innerHTML = `<tr><td colspan="5"><div class="alert alert-danger text-center">Erreur lors du chargement des emprunts.</div></td></tr>`;
+    }
   }
 
   // Permet à l'admin de retourner un livre pour un utilisateur

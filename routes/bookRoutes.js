@@ -18,55 +18,112 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Ajouter un livre avec image
-router.post('/add', upload.single('image'), async (req, res) => {
-  const { title, author, genre, price, description, stock } = req.body;
-  let imagePath = '';
-  if (req.file) {
-    imagePath = '/images/books/' + req.file.filename;
-  }
+// Ajouter un livre avec image (supporte image URL ou upload direct)
+router.post('/', async (req, res) => {
   try {
-    const book = new Book({
-      title,
-      author,
-      genre,
-      price,
-      description,
-      stock: stock || 0,
-      image: imagePath
-    });
-    await book.save();
-    // Always return the full book object for real-time UI
-    const bookObj = book.toObject();
-    if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
-    res.json({ message: 'Livre ajouté avec succès', bookId: book.id, book: bookObj });
+    // If the request is multipart/form-data, parse it as FormData
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+      // Use multer to parse file if present
+      upload.single('image')(req, res, async function (err) {
+        if (err) {
+          return res.status(400).json({ message: 'Erreur lors de l\'upload de l\'image' });
+        }
+        const { title, author, genre, price, description, stock } = req.body;
+        let imagePath = req.body.image || '';
+        if (req.file) {
+          imagePath = '/images/books/' + req.file.filename;
+        }
+        try {
+          const book = new Book({
+            title,
+            author,
+            genre,
+            price,
+            description,
+            stock: stock || 0,
+            image: imagePath
+          });
+          await book.save();
+          const bookObj = book.toObject();
+          if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+          return res.json({ message: 'Livre ajouté avec succès', bookId: book.id, book: bookObj });
+        } catch (err) {
+          console.error('Erreur lors de l’ajout du livre :', err);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+      });
+    } else {
+      // Handle JSON or urlencoded (no file upload, just image URL)
+      const { title, author, genre, price, description, stock, image } = req.body;
+      const book = new Book({
+        title,
+        author,
+        genre,
+        price,
+        description,
+        stock: stock || 0,
+        image: image || ''
+      });
+      await book.save();
+      const bookObj = book.toObject();
+      if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+      return res.json({ message: 'Livre ajouté avec succès', bookId: book.id, book: bookObj });
+    }
   } catch (err) {
     console.error('Erreur lors de l’ajout du livre :', err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
-// Mettre à jour un livre (avec support upload image)
-router.put('/:bookId', upload.single('image'), async (req, res) => {
-  const { title, author, genre, price, description, stock } = req.body;
+// Mettre à jour un livre (supporte upload image ou image URL)
+router.put('/:bookId', async (req, res) => {
   try {
-    const book = await Book.findById(req.params.bookId);
-    if (!book) return res.status(404).json({ message: 'Livre non trouvé' });
-
-    if (title) book.title = title;
-    if (author) book.author = author;
-    if (genre) book.genre = genre;
-    if (price) book.price = price;
-    if (description) book.description = description;
-    if (stock !== undefined) book.stock = stock;
-    if (req.file) {
-      book.image = '/images/books/' + req.file.filename;
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+      upload.single('image')(req, res, async function (err) {
+        if (err) {
+          return res.status(400).json({ message: 'Erreur lors de l\'upload de l\'image' });
+        }
+        const { title, author, genre, price, description, stock } = req.body;
+        let imagePath = req.body.image || '';
+        if (req.file) {
+          imagePath = '/images/books/' + req.file.filename;
+        }
+        try {
+          const book = await Book.findById(req.params.bookId);
+          if (!book) return res.status(404).json({ message: 'Livre non trouvé' });
+          if (title) book.title = title;
+          if (author) book.author = author;
+          if (genre) book.genre = genre;
+          if (price) book.price = price;
+          if (description) book.description = description;
+          if (stock !== undefined) book.stock = stock;
+          if (imagePath) book.image = imagePath;
+          await book.save();
+          const bookObj = book.toObject();
+          if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+          return res.json({ message: 'Livre mis à jour avec succès', book: bookObj });
+        } catch (err) {
+          console.error('Erreur lors de la mise à jour du livre :', err);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+      });
+    } else {
+      // Handle JSON or urlencoded (no file upload, just image URL)
+      const { title, author, genre, price, description, stock, image } = req.body;
+      const book = await Book.findById(req.params.bookId);
+      if (!book) return res.status(404).json({ message: 'Livre non trouvé' });
+      if (title) book.title = title;
+      if (author) book.author = author;
+      if (genre) book.genre = genre;
+      if (price) book.price = price;
+      if (description) book.description = description;
+      if (stock !== undefined) book.stock = stock;
+      if (image) book.image = image;
+      await book.save();
+      const bookObj = book.toObject();
+      if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+      return res.json({ message: 'Livre mis à jour avec succès', book: bookObj });
     }
-    await book.save();
-    // Always return the full book object for real-time UI
-    const bookObj = book.toObject();
-    if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
-    res.json({ message: 'Livre mis à jour avec succès', book: bookObj });
   } catch (err) {
     console.error('Erreur lors de la mise à jour du livre :', err);
     res.status(500).json({ message: 'Erreur serveur' });

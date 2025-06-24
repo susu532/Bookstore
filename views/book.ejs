@@ -80,7 +80,9 @@
               <% if (book.image) { %>
                 <img src="<%= book.image %>" alt="Couverture" class="img-fluid rounded shadow" style="max-height:320px;object-fit:cover;">
               <% } else { %>
-                <span class="text-muted">Aucune image</span>
+                <img src="/images/books/default-cover.png" alt="Couverture par défaut" class="img-fluid rounded shadow" style="max-height:320px;object-fit:cover;">
+                <!-- Alternatively, use DiceBear fallback: -->
+                <!-- <img src="https://api.dicebear.com/7.x/initials/svg?seed=<%= encodeURIComponent(book.title || 'B') %>" alt="Couverture générée" class="img-fluid rounded shadow" style="max-height:320px;object-fit:cover;"> -->
               <% } %>
             </div>
             <div class="col-md-7">
@@ -177,7 +179,7 @@
     })()
     // Commentaires & avis
     const bookId = '<%= book._id %>';
-    const currentUserId = '<%= user ? user._id : '' %>';
+    const currentUserId = '<%= user ? user._id : "" %>';
     let selectedRating = 0;
     let like = false;
     let dislike = false;
