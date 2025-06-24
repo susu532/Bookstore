@@ -1,10 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
+const multer = require('multer');
+const path = require('path');
 
-// Ajouter un livre
-router.post('/add', async (req, res) => {
+// Config multer pour upload d'image
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../public/images/books'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage });
+
+// Ajouter un livre avec image
+router.post('/add', upload.single('image'), async (req, res) => {
   const { title, author, genre, price, description, stock } = req.body;
+  let imagePath = '';
+  if (req.file) {
+    imagePath = '/images/books/' + req.file.filename;
+  }
   try {
     const book = new Book({
       title,
@@ -12,7 +30,8 @@ router.post('/add', async (req, res) => {
       genre,
       price,
       description,
-      stock: stock || 0
+      stock: stock || 0,
+      image: imagePath
     });
     await book.save();
     res.json({ message: 'Livre ajouté avec succès', bookId: book.id });

@@ -93,39 +93,9 @@
         <input type="text" id="orderSearchInput" class="form-control" placeholder="Rechercher par nom, email, livre...">
       </div>
     </div>
-    <% if (orders.length === 0) { %>
-      <div class="alert alert-info text-center mt-4 shadow-sm" role="alert">
-        <i class="bi bi-info-circle-fill me-2"></i>Aucune commande trouvée.
-      </div>
-    <% } else { %>
-      <div class="row justify-content-center" id="ordersList">
-        <% orders.forEach((order, orderIdx) => { %>
-          <div class="col-12 col-md-8 col-lg-6 order-item" data-user="<%= order.user && order.user.name ? order.user.name.toLowerCase() : '' %> <%= order.user && order.user.email ? order.user.email.toLowerCase() : '' %>" data-books="<%= order.books.map(item => item.book.title.toLowerCase()).join(' ') %>">
-            <div class="card order-card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span class="order-date"><i class="bi bi-calendar-event me-1"></i>Date : <%= order.createdAt.toLocaleDateString() %></span>
-                  <span class="order-total"><i class="bi bi-currency-euro me-1"></i><%= order.total %> €</span>
-                </div>
-                <div class="mb-2">
-                  <span class="fw-bold text-secondary"><i class="bi bi-person-circle me-1"></i>Utilisateur : <%= order.user && order.user.name ? order.user.name : 'Utilisateur inconnu' %> &lt;<%= order.user && order.user.email ? order.user.email : '' %>&gt;</span>
-                </div>
-                <hr>
-                <h6 class="mb-2 text-primary"><i class="bi bi-book-half me-1"></i>Livres commandés :</h6>
-                <ul class="list-unstyled book-list mb-0">
-                  <% order.books.forEach(item => { %>
-                    <li>
-                      <span class="fw-semibold"><%= item.book.title %></span>
-                      <span class="badge bg-gradient bg-info text-dark ms-2">Quantité : <%= item.quantity %></span>
-                    </li>
-                  <% }) %>
-                </ul>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    <% } %>
+    <div class="row justify-content-center" id="ordersList">
+      <!-- Les commandes seront injectées dynamiquement par JS -->
+    </div>
   </div>
   <div class="container mt-5">
     <%- include('../partials/footer') %>
@@ -135,6 +105,57 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/client.js"></script>
   <script>
+    // Rendu dynamique des commandes
+    function renderOrders(orders) {
+      const list = document.getElementById('ordersList');
+      list.innerHTML = '';
+      if (!orders.length) {
+        list.innerHTML = `<div class="alert alert-info text-center mt-4 shadow-sm" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>Aucune commande trouvée.
+        </div>`;
+        return;
+      }
+      orders.forEach(order => {
+        const userName = order.user && order.user.name ? order.user.name : 'Utilisateur inconnu';
+        const userEmail = order.user && order.user.email ? order.user.email : '';
+        const booksData = order.books.map(item => item.book.title.toLowerCase()).join(' ');
+        const orderDate = new Date(order.createdAt).toLocaleDateString();
+        const booksList = order.books.map(item => `
+          <li>
+            <span class="fw-semibold">${item.book.title}</span>
+            <span class="badge bg-gradient bg-info text-dark ms-2">Quantité : ${item.quantity}</span>
+          </li>
+        `).join('');
+        list.innerHTML += `
+          <div class="col-12 col-md-8 col-lg-6 order-item" data-user="${userName.toLowerCase()} ${userEmail.toLowerCase()}" data-books="${booksData}">
+            <div class="card order-card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="order-date"><i class="bi bi-calendar-event me-1"></i>Date : ${orderDate}</span>
+                  <span class="order-total"><i class="bi bi-currency-euro me-1"></i>${order.total} €</span>
+                </div>
+                <div class="mb-2">
+                  <span class="fw-bold text-secondary"><i class="bi bi-person-circle me-1"></i>Utilisateur : ${userName} &lt;${userEmail}&gt;</span>
+                </div>
+                <hr>
+                <h6 class="mb-2 text-primary"><i class="bi bi-book-half me-1"></i>Livres commandés :</h6>
+                <ul class="list-unstyled book-list mb-0">${booksList}</ul>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Charger toutes les commandes au chargement de la page
+    async function loadAllOrders() {
+      const res = await fetch('/api/admin/orders');
+      const orders = await res.json();
+      renderOrders(orders);
+    }
+    document.addEventListener('DOMContentLoaded', loadAllOrders);
+
+    // Recherche dynamique
     document.getElementById('orderSearchInput').addEventListener('input', function() {
       const value = this.value.toLowerCase();
       document.querySelectorAll('.order-item').forEach(function(item) {

@@ -74,36 +74,47 @@
     <div class="row justify-content-center">
       <div class="col-lg-7 col-md-9">
         <div class="book-card shadow-lg">
-          <div class="d-flex align-items-center mb-3 flex-wrap">
-            <h2 class="book-title mb-0"><%= book.title %></h2>
-            <span class="badge badge-genre ms-2"><%= book.genre %></span>
-          </div>
-          <p class="mb-2"><strong class="text-primary">Auteur :</strong> <span class="text-dark"><%= book.author %></span></p>
-          <p class="mb-2"><strong class="text-primary">Prix :</strong> <span class="price-tag"><%= book.price %> €</span></p>
-          <p class="mb-2"><strong class="text-primary">Description :</strong> <span class="text-secondary"><%= book.description || 'Aucune description disponible' %></span></p>
-          <p class="mb-4"><strong class="text-primary">Stock :</strong> <span class="<%= book.stock > 0 ? 'text-success' : 'text-danger' %> fw-bold"><%= book.stock %></span></p>
-          <div class="book-details">
-            <% if (user && book.stock > 0) { %>
-              <button class="btn btn-primary" onclick="emprunterLivre('<%= book._id %>')">Emprunter</button>
-            <% } else if (book.stock === 0) { %>
-              <span class="badge badge-warning">Indisponible</span>
-            <% } else if (!user) { %>
-              <a href="/login" class="btn btn-outline-primary">Connectez-vous pour emprunter</a>
-            <% } %>
-          </div>
-          <form id="addToCartForm" class="needs-validation" novalidate>
-            <input type="hidden" name="bookId" value="<%= book._id %>">
-            <div class="mb-3">
-              <label for="quantity" class="form-label">Quantité</label>
-              <input type="number" class="form-control form-control-lg" id="quantity" min="1" max="<%= book.stock %>" value="1" required style="max-width:120px;">
-              <div class="invalid-feedback">
-                Veuillez entrer une quantité valide.
-              </div>
+          <div class="row g-4 align-items-center">
+            <div class="col-md-5 text-center mb-3 mb-md-0">
+              <% if (book.image) { %>
+                <img src="<%= book.image %>" alt="Couverture" class="img-fluid rounded shadow" style="max-height:320px;object-fit:cover;">
+              <% } else { %>
+                <span class="text-muted">Aucune image</span>
+              <% } %>
             </div>
-            <button type="submit" class="btn btn-primary btn-lg w-100" <%= book.stock === 0 ? 'disabled' : '' %>>
-              <i class="bi bi-cart-plus"></i> Ajouter au panier
-            </button>
-          </form>
+            <div class="col-md-7">
+              <div class="d-flex align-items-center mb-3 flex-wrap">
+                <h2 class="book-title mb-0"><%= book.title %></h2>
+                <span class="badge badge-genre ms-2"><%= book.genre %></span>
+              </div>
+              <p class="mb-2"><strong class="text-primary">Auteur :</strong> <span class="text-dark"><%= book.author %></span></p>
+              <p class="mb-2"><strong class="text-primary">Prix :</strong> <span class="price-tag"><%= book.price %> €</span></p>
+              <p class="mb-2"><strong class="text-primary">Description :</strong> <span class="text-secondary"><%= book.description || 'Aucune description disponible' %></span></p>
+              <p class="mb-4"><strong class="text-primary">Stock :</strong> <span class="<%= book.stock > 0 ? 'text-success' : 'text-danger' %> fw-bold"><%= book.stock %></span></p>
+              <div class="book-details">
+                <% if (user && book.stock > 0) { %>
+                  <button class="btn btn-primary" onclick="emprunterLivre('<%= book._id %>')">Emprunter</button>
+                <% } else if (book.stock === 0) { %>
+                  <span class="badge badge-warning">Indisponible</span>
+                <% } else if (!user) { %>
+                  <a href="/login" class="btn btn-outline-primary">Connectez-vous pour emprunter</a>
+                <% } %>
+              </div>
+              <form id="addToCartForm" class="needs-validation" novalidate>
+                <input type="hidden" name="bookId" value="<%= book._id %>">
+                <div class="mb-3">
+                  <label for="quantity" class="form-label">Quantité</label>
+                  <input type="number" class="form-control form-control-lg" id="quantity" min="1" max="<%= book.stock %>" value="1" required style="max-width:120px;">
+                  <div class="invalid-feedback">
+                    Veuillez entrer une quantité valide.
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100" <%= book.stock === 0 ? 'disabled' : '' %>>
+                  <i class="bi bi-cart-plus"></i> Ajouter au panier
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>

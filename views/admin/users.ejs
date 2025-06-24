@@ -97,23 +97,7 @@
                 </tr>
               </thead>
               <tbody id="usersTableBody">
-                <% users.forEach(user => { if(user.role !== 1) { %>
-                  <tr data-user-id="<%= user._id %>">
-                    <td class="fw-semibold"><%= user.name %></td>
-                    <td><%= user.email %></td>
-                    <td>
-                      <span class="badge badge-user">Utilisateur</span>
-                    </td>
-                    <td>
-                      <span class="badge <%= user.isActive ? 'bg-success' : 'bg-danger' %>">
-                        <%= user.isActive ? 'Oui' : 'Non' %>
-                      </span>
-                    </td>
-                    <td>
-                      <button class="btn btn-sm btn-danger shadow" onclick='deleteUser("<%= user._id %>")'>Supprimer</button>
-                    </td>
-                  </tr>
-                <% } }) %>
+                <!-- Les utilisateurs seront injectés dynamiquement par JS -->
               </tbody>
             </table>
           </div>
@@ -129,7 +113,34 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
   <script src="/js/client.js"></script>
   <script>
-    // Simple client-side search filter for users table
+    // Rendu dynamique des utilisateurs
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '';
+      users.forEach(user => {
+        if(user.role !== 1) {
+          tbody.innerHTML += `
+            <tr data-user-id="${user._id}">
+              <td class="fw-semibold">${user.name}</td>
+              <td>${user.email}</td>
+              <td><span class="badge badge-user">Utilisateur</span></td>
+              <td><span class="badge ${user.isActive ? 'bg-success' : 'bg-danger'}">${user.isActive ? 'Oui' : 'Non'}</span></td>
+              <td><button class="btn btn-sm btn-danger shadow" onclick='deleteUser("${user._id}")'>Supprimer</button></td>
+            </tr>
+          `;
+        }
+      });
+    }
+
+    // Charger tous les utilisateurs au chargement de la page
+    async function loadAllUsers() {
+      const res = await fetch('/api/admin/users');
+      const users = await res.json();
+      renderUsers(users);
+    }
+    document.addEventListener('DOMContentLoaded', loadAllUsers);
+
+    // Recherche dynamique
     function filterUsers() {
       const input = document.getElementById('userSearchInput').value.toLowerCase();
       const rows = document.querySelectorAll('#usersTableBody tr');
@@ -139,18 +150,15 @@
       });
     }
 
-    // Delete user
+    // Suppression utilisateur
     async function deleteUser(userId) {
       if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
       try {
-        const res = await fetch(`/api/admin/users/${userId}`, {
-          method: 'DELETE',
-        });
+        const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
         const data = await res.json();
         if (res.ok) {
-          // Remove the row from the table
-          const row = document.querySelector(`[data-user-id='${userId}']`);
-          if (row) row.remove();
+          // Recharger la liste après suppression
+          await loadAllUsers();
         } else {
           alert(data.message || 'Erreur lors de la suppression');
         }

@@ -155,58 +155,8 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <% emprunts.forEach(e => { %>
-              <tr>
-                <td>
-                  <% if (e.user) { %>
-                    <span class="badge-modern badge-info">
-                      <i class="bi bi-person-circle"></i>
-                      <%= e.user.name %>
-                    </span>
-                    <br>
-                    <small style="color:#6c757d;"><%= e.user.email %></small>
-                  <% } else { %>
-                    <span class="badge bg-secondary">Utilisateur inconnu</span>
-                  <% } %>
-                </td>
-                <td>
-                  <span class="badge-modern badge-info">
-                    <i class="bi bi-book"></i>
-                    <%= e.book.title %>
-                  </span>
-                </td>
-                <td>
-                  <span class="badge-modern badge-info">
-                    <i class="bi bi-calendar-event"></i>
-                    <%= e.dateEmprunt.toLocaleDateString() %>
-                  </span>
-                </td>
-                <td>
-                  <% if (e.dateRetour) { %>
-                    <span class="badge-modern badge-success">
-                      <i class="bi bi-check-circle"></i> <%= e.dateRetour.toLocaleDateString() %>
-                    </span>
-                  <% } else { %>
-                    <span class="badge-modern badge-warning">
-                      <i class="bi bi-clock-history"></i> Non retourné
-                    </span>
-                  <% } %>
-                </td>
-                <td>
-                  <% if (!e.dateRetour) { %>
-                    <button class="btn btn-modern btn-sm"
-                            onclick="retournerLivre('<%= e._id %>')">
-                      <i class="bi bi-arrow-return-left"></i> Retourner
-                    </button>
-                  <% } else { %>
-                    <span class="badge-modern badge-returned">
-                      <i class="bi bi-check2-all"></i> Retourné
-                    </span>
-                  <% } %>
-                </td>
-              </tr>
-            <% }) %>
+          <tbody id="empruntsTableBody">
+            <!-- Les emprunts seront injectés dynamiquement par JS -->
           </tbody>
         </table>
       </div>
@@ -246,7 +196,39 @@
         `;
       }
     }
+    // Charger tous les emprunts dynamiquement
+    await loadAllEmprunts();
   });
+
+  // Rendu dynamique des emprunts
+  function renderEmprunts(emprunts) {
+    const tbody = document.getElementById('empruntsTableBody');
+    tbody.innerHTML = '';
+    emprunts.forEach(e => {
+      tbody.innerHTML += `
+        <tr>
+          <td>
+            ${e.user ? `<span class="badge-modern badge-info"><i class="bi bi-person-circle"></i> ${e.user.name}</span><br><small style="color:#6c757d;">${e.user.email}</small>` : '<span class="badge bg-secondary">Utilisateur inconnu</span>'}
+          </td>
+          <td><span class="badge-modern badge-info"><i class="bi bi-book"></i> ${e.book.title}</span></td>
+          <td><span class="badge-modern badge-info"><i class="bi bi-calendar-event"></i> ${new Date(e.dateEmprunt).toLocaleDateString()}</span></td>
+          <td>
+            ${e.dateRetour ? `<span class="badge-modern badge-success"><i class="bi bi-check-circle"></i> ${new Date(e.dateRetour).toLocaleDateString()}</span>` : `<span class="badge-modern badge-warning"><i class="bi bi-clock-history"></i> Non retourné</span>`}
+          </td>
+          <td>
+            ${!e.dateRetour ? `<button class="btn btn-modern btn-sm" onclick="retournerLivre('${e._id}')"><i class="bi bi-arrow-return-left"></i> Retourner</button>` : `<span class="badge-modern badge-returned"><i class="bi bi-check2-all"></i> Retourné</span>`}
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  // Charger tous les emprunts
+  async function loadAllEmprunts() {
+    const res = await fetch('/api/emprunts');
+    const emprunts = await res.json();
+    renderEmprunts(emprunts);
+  }
 
   // Permet à l'admin de retourner un livre pour un utilisateur
   async function retournerLivre(empruntId) {
@@ -257,7 +239,7 @@
     const data = await res.json();
     if (res.ok) {
       alert('Livre retourné avec succès');
-      window.location.reload();
+      await loadAllEmprunts();
     } else {
       alert(data.message || 'Erreur lors du retour');
     }

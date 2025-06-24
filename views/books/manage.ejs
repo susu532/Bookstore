@@ -110,7 +110,8 @@
             </div>
             <div class="mb-3">
               <label for="genre" class="form-label">Genre</label>
-              <select class="form-control" id="genre" name="genre" required multiple>
+              <select class="form-control" id="genre" name="genre" required>
+                <option value="">-- Choisir un genre --</option>
                 <option value="Roman">Roman</option>
                 <option value="Science-fiction">Science-fiction</option>
                 <option value="Fantastique">Fantastique</option>
@@ -121,8 +122,50 @@
                 <option value="Poésie">Poésie</option>
                 <option value="Essai">Essai</option>
                 <option value="Autre">Autre</option>
+                <option value="Aventure">Aventure</option>
+                <option value="Drame">Drame</option>
+                <option value="Humour">Humour</option>
+                <option value="Classique">Classique</option>
+                <option value="Théâtre">Théâtre</option>
+                <option value="Philosophie">Philosophie</option>
+                <option value="Psychologie">Psychologie</option>
+                <option value="Religion">Religion</option>
+                <option value="Sociologie">Sociologie</option>
+                <option value="Cuisine">Cuisine</option>
+                <option value="Voyage">Voyage</option>
+                <option value="Art">Art</option>
+                <option value="Musique">Musique</option>
+                <option value="Informatique">Informatique</option>
+                <option value="Manga">Manga</option>
+                <option value="BD">Bande dessinée</option>
+                <option value="Santé">Santé</option>
+                <option value="Sport">Sport</option>
+                <option value="Nature">Nature</option>
+                <option value="Animaux">Animaux</option>
+                <option value="Économie">Économie</option>
+                <option value="Politique">Politique</option>
+                <option value="Sciences">Sciences</option>
+                <option value="Technologie">Technologie</option>
+                <option value="Éducation">Éducation</option>
+                <option value="Entreprise">Entreprise</option>
+                <option value="Dictionnaire">Dictionnaire</option>
+                <option value="Guide">Guide</option>
+                <option value="Loisirs">Loisirs</option>
+                <option value="Spiritualité">Spiritualité</option>
+                <option value="Érotique">Érotique</option>
+                <option value="LGBTQ+">LGBTQ+</option>
+                <option value="Féminisme">Féminisme</option>
+                <option value="Guerre">Guerre</option>
+                <option value="Médical">Médical</option>
+                <option value="Paranormal">Paranormal</option>
+                <option value="Western">Western</option>
+                <option value="Chick-lit">Chick-lit</option>
+                <option value="Young Adult">Young Adult</option>
+                <option value="New Adult">New Adult</option>
+                <option value="Roman graphique">Roman graphique</option>
+                <option value="Littérature étrangère">Littérature étrangère</option>
+                <option value="Littérature française">Littérature française</option>
               </select>
-              <small class="text-muted">(Ctrl+clic pour sélectionner plusieurs genres)</small>
             </div>
             <div class="mb-3">
               <label for="price" class="form-label">Prix (€)</label>
@@ -135,6 +178,10 @@
             <div class="mb-3">
               <label for="stock" class="form-label">Stock</label>
               <input type="number" class="form-control" id="stock" name="stock" min="0" value="0">
+            </div>
+            <div class="mb-3">
+              <label for="image" class="form-label">Image de couverture</label>
+              <input type="file" class="form-control" id="image" name="image" accept="image/*">
             </div>
             <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Ajouter le Livre</button>
           </form>
@@ -162,53 +209,12 @@
                   <th scope="col"><i class="bi bi-tags"></i> Genre</th>
                   <th scope="col"><i class="bi bi-currency-euro"></i> Prix</th>
                   <th scope="col"><i class="bi bi-box"></i> Stock</th>
+                  <th scope="col"><i class="bi bi-image"></i> Couverture</th>
                   <th scope="col"><i class="bi bi-gear"></i> Actions</th>
                 </tr>
               </thead>
               <tbody id="booksTableBody">
-                <% books.forEach(book => { %>
-                  <tr data-book-id="<%= book._id %>">
-                    <td><%= book.title %></td>
-                    <td><%= book.author %></td>
-                    <td><span class="badge bg-info bg-gradient text-dark">
-  <% if (Array.isArray(book.genre)) { %>
-    <%= book.genre.join(', ') %>
-  <% } else { %>
-    <%= book.genre %>
-  <% } %>
-</span></td>
-                    <td><span class="fw-bold text-success"><%= book.price %></span></td>
-                    <td>
-                      <% if (book.stock > 5) { %>
-                        <span class="badge bg-success"><%= book.stock %></span>
-                      <% } else if (book.stock > 0) { %>
-                        <span class="badge bg-warning text-dark"><%= book.stock %></span>
-                      <% } else { %>
-                        <span class="badge bg-danger">Rupture</span>
-                      <% } %>
-                    </td>
-                    <td>
-                      <button
-                        onclick="editBook(
-                          '<%= book._id %>',
-                          '<%- book.title.replace(/'/g, '\&#39;') %>',
-                          '<%- book.author.replace(/'/g, '\&#39;') %>',
-                          <%= Array.isArray(book.genre) ? JSON.stringify(book.genre) : `'${book.genre}'` %>,
-                          '<%= book.price %>',
-                          '<%= book.stock %>'
-                        )"
-                        class="btn btn-sm btn-primary me-1" title="Modifier">
-                        <i class="bi bi-pencil-square"></i>
-                      </button>
-                      <button onclick="deleteBook('<%= book._id %>')" class="btn btn-sm btn-danger me-1" title="Supprimer">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                      <a href="/book/<%= book._id %>" class="btn btn-sm btn-info" title="Détails">
-                        <i class="bi bi-info-circle"></i>
-                      </a>
-                    </td>
-                  </tr>
-                <% }) %>
+                <!-- Les livres seront injectés dynamiquement par JS -->
               </tbody>
             </table>
           </div>
@@ -224,5 +230,59 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/client.js"></script>
+  <script>
+    // Rendu dynamique des livres (avec image)
+    function renderBooks(books) {
+      const tbody = document.getElementById('booksTableBody');
+      tbody.innerHTML = '';
+      books.forEach(book => {
+        tbody.innerHTML += `
+          <tr data-book-id="${book._id}">
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td><span class="badge bg-info bg-gradient text-dark">${book.genre}</span></td>
+            <td><span class="fw-bold text-success">${book.price}</span></td>
+            <td>${book.stock > 5 ? `<span class='badge bg-success'>${book.stock}</span>` : book.stock > 0 ? `<span class='badge bg-warning text-dark'>${book.stock}</span>` : `<span class='badge bg-danger'>Rupture</span>`}</td>
+            <td>${book.image ? `<img src='${book.image}' alt='Couverture' style='width:48px;height:64px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;'>` : `<span class='text-muted'>Aucune</span>`}</td>
+            <td>
+              <button onclick="editBook('
+                ${encodeURIComponent(book._id)}','
+                ${encodeURIComponent(book.title)}','
+                ${encodeURIComponent(book.author)}','
+                ${encodeURIComponent(book.genre)}','
+                ${encodeURIComponent(book.price)}','
+                ${encodeURIComponent(book.stock)}'
+              )" class="btn btn-sm btn-primary me-1" title="Modifier">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button onclick="deleteBook('${book._id}')" class="btn btn-sm btn-danger me-1" title="Supprimer">
+                <i class="bi bi-trash"></i>
+              </button>
+              <a href="/book/${book._id}" class="btn btn-sm btn-info" title="Détails">
+                <i class="bi bi-info-circle"></i>
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Charger tous les livres au chargement de la page
+    async function loadAllBooks() {
+      const res = await fetch('/api/books');
+      const books = await res.json();
+      renderBooks(books);
+    }
+    document.addEventListener('DOMContentLoaded', loadAllBooks);
+
+    // Recherche dynamique
+    document.getElementById('searchBooksForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = document.getElementById('searchQuery').value;
+      const res = await fetch(`/api/books/search?query=${encodeURIComponent(query)}`);
+      const books = await res.json();
+      renderBooks(books);
+    });
+  </script>
 </body>
 </html>

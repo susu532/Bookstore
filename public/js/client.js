@@ -116,7 +116,34 @@ document.getElementById('addBookForm')?.addEventListener('submit', async (e) => 
   const data = await res.json();
   if (res.ok) {
     showNotification(data.message, 'success');
-    window.location.reload();
+    // Real-time update: add the new book to the table without reload
+    const booksTableBody = document.getElementById('booksTableBody');
+    if (booksTableBody && data.bookId) {
+      const row = document.createElement('tr');
+      row.setAttribute('data-book-id', data.bookId);
+      row.innerHTML = `
+        <td>${title}</td>
+        <td>${author}</td>
+        <td><span class="badge bg-info bg-gradient text-dark">${genre}</span></td>
+        <td><span class="fw-bold text-success">${price}</span></td>
+        <td><span class="badge bg-success">${stock}</span></td>
+        <td>
+          <button onclick="editBook('${data.bookId}', '${title.replace(/'/g, "&#39;")}', '${author.replace(/'/g, "&#39;")}', '${genre}', '${price}', '${stock}')" class="btn btn-sm btn-primary me-1" title="Modifier">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button onclick="deleteBook('${data.bookId}')" class="btn btn-sm btn-danger me-1" title="Supprimer">
+            <i class="bi bi-trash"></i>
+          </button>
+          <a href="/book/${data.bookId}" class="btn btn-sm btn-info" title="Détails">
+            <i class="bi bi-info-circle"></i>
+          </a>
+        </td>
+      `;
+      booksTableBody.prepend(row);
+      document.getElementById('addBookForm').reset();
+    } else {
+      window.location.reload();
+    }
   } else {
     showNotification(data.message || 'Erreur lors de l’ajout du livre', 'error');
   }
