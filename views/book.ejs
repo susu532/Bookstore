@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body {
       background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
@@ -119,11 +120,46 @@
       </div>
     </div>
   </div>
+  <div class="container mb-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card p-4 shadow-sm mb-4">
+          <h4 class="mb-3">Commentaires & Avis</h4>
+          <% if (user) { %>
+          <form id="commentForm" class="mb-4">
+            <div class="mb-2">
+              <label for="commentText" class="form-label">Votre commentaire</label>
+              <textarea class="form-control" id="commentText" rows="2" required></textarea>
+            </div>
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <label class="form-label mb-0">Note :</label>
+              <span id="starRating">
+                <i class="bi bi-star" data-value="1"></i>
+                <i class="bi bi-star" data-value="2"></i>
+                <i class="bi bi-star" data-value="3"></i>
+                <i class="bi bi-star" data-value="4"></i>
+                <i class="bi bi-star" data-value="5"></i>
+              </span>
+              <input type="hidden" id="ratingValue" value="0">
+            </div>
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-outline-success btn-sm" id="likeBtn"><i class="bi bi-hand-thumbs-up"></i> Like</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" id="dislikeBtn"><i class="bi bi-hand-thumbs-down"></i> Dislike</button>
+            </div>
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+          </form>
+          <% } else { %>
+            <div class="alert alert-info">Connectez-vous pour commenter et noter ce livre.</div>
+          <% } %>
+          <div id="commentsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="container">
     <%- include('partials/footer') %>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
   <script>
     // Bootstrap validation
     (() => {
@@ -139,7 +175,178 @@
         }, false)
       })
     })()
+    // Commentaires & avis
+    const bookId = '<%= book._id %>';
+    const currentUserId = '<%= user ? user._id : '' %>';
+    let selectedRating = 0;
+    let like = false;
+    let dislike = false;
+
+    function renderComments(comments) {
+      const list = document.getElementById('commentsList');
+      if (!comments.length) {
+        list.innerHTML = '<div class="text-muted">Aucun commentaire pour ce livre.</div>';
+        return;
+      }
+      let avg = 0, count = 0;
+      comments.forEach(c => { if (c.rating) { avg += c.rating; count++; } });
+      avg = count ? (avg / count).toFixed(1) : '-';
+      let html = `<div class="mb-2"><strong>Note moyenne :</strong> <span class="text-warning">${avg} <i class="bi bi-star-fill"></i></span> (${count} avis)</div>`;
+      html += comments.map(c => {
+        const isOwner = currentUserId && c.user === currentUserId;
+        // Use icons for stars and like/dislike
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+          stars += `<i class='bi ${i <= (c.rating || 0) ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}'></i>`;
+        }
+        return `
+          <div class="border rounded p-2 mb-2 comment-item" data-comment-id="${c._id}">
+            <div class="d-flex align-items-center mb-1">
+              <img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.username || 'U')}" alt="avatar" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;">
+              <span class="fw-bold me-2">${c.username || 'Utilisateur'}</span>
+              <span class="ms-2">${stars}</span>
+              ${c.like ? '<i class="bi bi-hand-thumbs-up-fill text-success ms-2" title="Like"></i>' : ''}
+              ${c.dislike ? '<i class="bi bi-hand-thumbs-down-fill text-danger ms-2" title="Dislike"></i>' : ''}
+              <span class="ms-auto text-muted" style="font-size:0.9em;">${new Date(c.createdAt).toLocaleString()}</span>
+              ${isOwner ? `<button class="btn btn-link btn-sm text-primary edit-comment-btn ms-2" title="Modifier"><i class="bi bi-pencil"></i></button><button class="btn btn-link btn-sm text-danger delete-comment-btn" title="Supprimer"><i class="bi bi-trash"></i></button>` : ''}
+            </div>
+            <div class="comment-text">${c.text}</div>
+          </div>
+        `;
+      }).join('');
+      list.innerHTML = html;
+      // Add event listeners for edit/delete
+      if (currentUserId) {
+        document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const item = this.closest('.comment-item');
+            const commentId = item.getAttribute('data-comment-id');
+            const textDiv = item.querySelector('.comment-text');
+            const oldText = textDiv.textContent;
+            textDiv.innerHTML = `<textarea class='form-control mb-2 edit-comment-text'>${oldText}</textarea><button class='btn btn-success btn-sm save-edit-btn me-2'>Enregistrer</button><button class='btn btn-secondary btn-sm cancel-edit-btn'>Annuler</button>`;
+            item.querySelector('.save-edit-btn').addEventListener('click', async function() {
+              const newText = item.querySelector('.edit-comment-text').value;
+              const res = await fetch(`/api/books/comment/${commentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: newText })
+              });
+              if (res.ok) loadComments();
+            });
+            item.querySelector('.cancel-edit-btn').addEventListener('click', function() {
+              textDiv.textContent = oldText;
+            });
+          });
+        });
+        document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+          btn.addEventListener('click', async function() {
+            if (!confirm('Supprimer ce commentaire ?')) return;
+            const item = this.closest('.comment-item');
+            const commentId = item.getAttribute('data-comment-id');
+            const res = await fetch(`/api/books/comment/${commentId}`, { method: 'DELETE' });
+            if (res.ok) loadComments();
+          });
+        });
+      }
+    }
+
+    async function loadComments() {
+      const res = await fetch(`/api/books/${bookId}/comments`);
+      const comments = await res.json();
+      renderComments(comments);
+    }
+    loadComments();
   </script>
+  <% if (user) { %>
+  <script>
+    // Star rating UI
+    document.querySelectorAll('#starRating .bi-star').forEach(star => {
+      star.addEventListener('mouseenter', function() {
+        const val = +this.getAttribute('data-value');
+        document.querySelectorAll('#starRating .bi-star, #starRating .bi-star-fill').forEach(s => {
+          s.classList.toggle('bi-star-fill', +s.getAttribute('data-value') <= val);
+          s.classList.toggle('bi-star', +s.getAttribute('data-value') > val);
+        });
+      });
+      star.addEventListener('mouseleave', function() {
+        document.querySelectorAll('#starRating .bi-star, #starRating .bi-star-fill').forEach(s => {
+          s.classList.toggle('bi-star-fill', +s.getAttribute('data-value') <= selectedRating);
+          s.classList.toggle('bi-star', +s.getAttribute('data-value') > selectedRating);
+        });
+      });
+      star.addEventListener('click', function() {
+        selectedRating = +this.getAttribute('data-value');
+        document.getElementById('ratingValue').value = selectedRating;
+        updateEnvoyerBtn();
+      });
+    });
+    // Like/dislike UI
+    document.getElementById('likeBtn').addEventListener('click', function() {
+      like = !like; dislike = false;
+      this.classList.toggle('btn-success', like);
+      this.querySelector('i').classList.toggle('bi-hand-thumbs-up-fill', like);
+      this.querySelector('i').classList.toggle('bi-hand-thumbs-up', !like);
+      document.getElementById('dislikeBtn').classList.remove('btn-danger');
+      document.getElementById('dislikeBtn').querySelector('i').classList.remove('bi-hand-thumbs-down-fill');
+      document.getElementById('dislikeBtn').querySelector('i').classList.add('bi-hand-thumbs-down');
+      updateEnvoyerBtn();
+    });
+    document.getElementById('dislikeBtn').addEventListener('click', function() {
+      dislike = !dislike; like = false;
+      this.classList.toggle('btn-danger', dislike);
+      this.querySelector('i').classList.toggle('bi-hand-thumbs-down-fill', dislike);
+      this.querySelector('i').classList.toggle('bi-hand-thumbs-down', !dislike);
+      document.getElementById('likeBtn').classList.remove('btn-success');
+      document.getElementById('likeBtn').querySelector('i').classList.remove('bi-hand-thumbs-up-fill');
+      document.getElementById('likeBtn').querySelector('i').classList.add('bi-hand-thumbs-up');
+      updateEnvoyerBtn();
+    });
+    // Submit comment
+    document.getElementById('commentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const text = document.getElementById('commentText').value.trim();
+      const rating = selectedRating;
+      // Always send like/dislike as booleans
+      const res = await fetch(`/api/books/${bookId}/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, rating, like: !!like, dislike: !!dislike })
+      });
+      if (res.ok) {
+        document.getElementById('commentText').value = '';
+        selectedRating = 0; like = false; dislike = false;
+        document.querySelectorAll('#starRating .bi-star, #starRating .bi-star-fill').forEach(s => {
+          s.classList.remove('bi-star-fill');
+          s.classList.add('bi-star');
+        });
+        document.getElementById('likeBtn').classList.remove('btn-success');
+        document.getElementById('likeBtn').querySelector('i').classList.remove('bi-hand-thumbs-up-fill');
+        document.getElementById('likeBtn').querySelector('i').classList.add('bi-hand-thumbs-up');
+        document.getElementById('dislikeBtn').classList.remove('btn-danger');
+        document.getElementById('dislikeBtn').querySelector('i').classList.remove('bi-hand-thumbs-down-fill');
+        document.getElementById('dislikeBtn').querySelector('i').classList.add('bi-hand-thumbs-down');
+        updateEnvoyerBtn();
+        await loadComments();
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Erreur lors de l\'envoi du commentaire.');
+      }
+    });
+    // Fix Envoyer button: disable if no comment or rating/like/dislike
+    const envoyerBtn = document.querySelector('#commentForm button[type="submit"]');
+    function updateEnvoyerBtn() {
+      const text = document.getElementById('commentText').value.trim();
+      envoyerBtn.disabled = !text && !selectedRating && !like && !dislike;
+    }
+    document.getElementById('commentText').addEventListener('input', updateEnvoyerBtn);
+    document.querySelectorAll('#starRating .bi-star').forEach(star => {
+      star.addEventListener('click', updateEnvoyerBtn);
+    });
+    document.getElementById('likeBtn').addEventListener('click', updateEnvoyerBtn);
+    document.getElementById('dislikeBtn').addEventListener('click', updateEnvoyerBtn);
+    updateEnvoyerBtn();
+  </script>
+  <% } %>
   <script src="/js/client.js"></script>
 </body>
 </html>

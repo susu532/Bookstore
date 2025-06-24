@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
+const Comment = require('../models/Comment');
 const multer = require('multer');
 const path = require('path');
 
@@ -119,6 +120,73 @@ router.get('/', async (req, res) => {
     res.json(books);
   } catch (err) {
     console.error('Erreur lors de la récupération des livres :', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Ajouter un commentaire, une note, un like/dislike
+router.post('/:bookId/comment', async (req, res) => {
+  if (!req.user || !req.user._id) return res.status(401).json({ message: 'Vous devez être connecté pour commenter.' });
+  const { text, rating, like, dislike } = req.body;
+  if (!text && !rating && !like && !dislike) {
+    return res.status(400).json({ message: 'Le commentaire, la note ou le like/dislike est requis.' });
+  }
+  try {
+    const comment = new Comment({
+      book: req.params.bookId,
+      user: req.user._id,
+      username: req.user.name || req.user.email || 'Utilisateur',
+      text: text || '',
+      rating,
+      like: !!like,
+      dislike: !!dislike
+    });
+    await comment.save();
+    res.json({ message: 'Commentaire ajouté', comment });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur', error: err.message });
+  }
+});
+
+// Récupérer les commentaires d'un livre
+router.get('/:bookId/comments', async (req, res) => {
+  try {
+    const comments = await Comment.find({ book: req.params.bookId }).sort({ createdAt: -1 });
+    res.json(comments);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Modifier un commentaire
+router.put('/comment/:commentId', async (req, res) => {
+  if (!req.user) return res.status(401).json({ message: 'Non autorisé' });
+  const { text, rating, like, dislike } = req.body;
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: 'Commentaire non trouvé' });
+    if (String(comment.user) !== String(req.user._id)) return res.status(403).json({ message: 'Non autorisé' });
+    if (text) comment.text = text;
+    if (rating) comment.rating = rating;
+    comment.like = !!like;
+    comment.dislike = !!dislike;
+    await comment.save();
+    res.json({ message: 'Commentaire modifié', comment });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Supprimer un commentaire
+router.delete('/comment/:commentId', async (req, res) => {
+  if (!req.user) return res.status(401).json({ message: 'Non autorisé' });
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: 'Commentaire non trouvé' });
+    if (String(comment.user) !== String(req.user._id)) return res.status(403).json({ message: 'Non autorisé' });
+    await comment.deleteOne();
+    res.json({ message: 'Commentaire supprimé' });
+  } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
