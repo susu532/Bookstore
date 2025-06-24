@@ -190,7 +190,7 @@
           <div class="overdue-card">
             <b>Emprunts en retard :</b>
             <ul style="margin:0.5em 0 0 1.2em;">
-              ${data.emprunts.map(e => `<li><b>${e.user.name}</b> - <i>${e.book.title}</i> <span style="color:#a94442;">(depuis le ${new Date(e.dateEmprunt).toLocaleDateString()})</span></li>`).join('')}
+              ${data.emprunts.map(e => `<li><b>${e.user && e.user.name ? e.user.name : 'Utilisateur inconnu'}</b> - <i>${e.book && e.book.title ? e.book.title : 'Livre inconnu'}</i> <span style="color:#a94442;">(depuis le ${e.dateEmprunt ? new Date(e.dateEmprunt).toLocaleDateString() : ''})</span></li>`).join('')}
             </ul>
           </div>
         `;
