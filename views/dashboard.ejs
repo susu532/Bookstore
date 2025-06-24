@@ -273,15 +273,21 @@
           <i class="bi bi-trophy"></i>
         </div>
         <h5 class="mt-3 mb-2">🎮 Gamification</h5>
-        <div class="d-flex align-items-center gap-3 justify-content-center mb-2">
-          <span class="badge bg-success" style="font-size:1.3rem;">Points : <span id="userPoints"><%= user.points %></span></span>
-          <span class="badge bg-warning text-dark" style="font-size:1.3rem;">Niveau : <span id="userLevel"><%= user.level %></span></span>
-          <span class="badge bg-info text-dark" style="font-size:1.3rem;">Badges : <span id="userBadges"><%= Array.isArray(user.badges) ? user.badges.join(', ') : user.badges %></span></span>
+        <div class="d-flex flex-wrap align-items-center gap-3 justify-content-center mb-2" style="row-gap:1rem;">
+          <span class="badge bg-success d-flex align-items-center" style="font-size:1.3rem; min-width:120px; justify-content:center;">
+            <i class="bi bi-star-fill me-1"></i> Points : <span id="userPoints" class="ms-1"><%= user.points %></span>
+          </span>
+          <span class="badge bg-warning text-dark d-flex align-items-center" style="font-size:1.3rem; min-width:120px; justify-content:center;">
+            <i class="bi bi-bar-chart-steps me-1"></i> Niveau : <span id="userLevel" class="ms-1"><%= user.level %></span>
+          </span>
+          <span class="badge bg-info text-dark d-flex align-items-center" style="font-size:1.3rem; min-width:120px; justify-content:center;">
+            <i class="bi bi-award me-1"></i> Badges : <span id="userBadges" class="ms-1"><%= Array.isArray(user.badges) ? user.badges.join(', ') : user.badges %></span>
+          </span>
         </div>
         <div class="progress mt-2 mb-1" style="height:12px;max-width:400px;margin:auto;">
           <div class="progress-bar bg-primary" id="levelProgress" role="progressbar" style="width:<%= Math.min(100, Math.round((user.points/100)*100)) %>%;"></div>
         </div>
-        <small class="text-muted" style="font-size:1.1rem;">Gagnez des points en commentant, empruntant ou notant des livres !</small>
+        <small class="text-muted d-block mt-2" style="font-size:1.1rem;">Gagnez des points en commentant, empruntant ou notant des livres !</small>
       </div>
     </div>
   </div>

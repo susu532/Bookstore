@@ -74,6 +74,7 @@ app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/emprunts', require('./routes/empruntRoutes'));
 app.use('/api/books', require('./routes/bookUploadRoutes'));
+app.use('/api/wishlist', require('./routes/wishlist'));
 
 // Auth middleware for protected routes
 const checkAuth = (req, res, next) => {
@@ -144,6 +145,17 @@ app.get('/emprunts', checkAuth, async (req, res) => {
   const Emprunt = require('./models/Emprunt');
   const emprunts = await Emprunt.find({ user: req.user._id }).populate('book');
   res.render('emprunts', { user: req.user, emprunts });
+});
+// Wishlist page (GET /wishlist)
+app.get('/wishlist', checkAuth, async (req, res) => {
+  const user = req.user;
+  if (!user || !user.wishlist || user.wishlist.length === 0) {
+    return res.render('wishlist', { user, wishlistBooks: [] });
+  }
+  // Populate books in wishlist
+  const Book = require('./models/Book');
+  const wishlistBooks = await Book.find({ _id: { $in: user.wishlist } });
+  res.render('wishlist', { user, wishlistBooks });
 });
 
 // Routes Admin

@@ -28,23 +28,21 @@
   <%- include('partials/navbar', { user }) %>
   <div class="container py-4">
     <h2 class="mb-4"><i class="bi bi-heart-fill text-danger"></i> Mes Favoris</h2>
+    <div id="wishlistAlert"></div>
+    <div id="wishlistBooksContainer">
     <% if (wishlistBooks && wishlistBooks.length > 0) { %>
       <div class="row">
         <% wishlistBooks.forEach(function(book) { %>
-          <div class="col-md-4 mb-4">
+          <div class="col-md-4 mb-4" data-book-id="<%= book._id %>">
             <div class="wishlist-card p-3">
               <div class="d-flex align-items-center">
                 <img src="<%= book.image || '/images/books/default-cover.png' %>" alt="Couverture" class="book-cover me-3">
                 <div>
                   <h5 class="mb-1"><%= book.title %></h5>
                   <p class="mb-1 text-muted"><%= book.author %></p>
-                  <div class="d-flex">
-                    <form method="POST" action="/wishlist/<%= book._id %>/move-to-cart">
-                      <button type="submit" class="btn btn-sm btn-outline-primary move-btn me-2"><i class="bi bi-cart-plus"></i> Déplacer vers le panier</button>
-                    </form>
-                    <form method="POST" action="/wishlist/<%= book._id %>/remove?_method=DELETE">
-                      <button type="submit" class="btn btn-sm btn-outline-warning remove-btn"><i class="bi bi-x-circle"></i> Retirer</button>
-                    </form>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-primary btn-sm move-to-cart-btn"><i class="bi bi-cart-plus"></i> Déplacer vers le panier</button>
+                    <button class="btn btn-outline-danger btn-sm toggle-wishlist-btn"><i class="bi bi-heart-fill"></i> Retirer</button>
                   </div>
                 </div>
               </div>
@@ -55,6 +53,70 @@
     <% } else { %>
       <div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>
     <% } %>
+    </div>
   </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const userId = '<%= user ? user._id : "" %>';
+    const wishlistCount = document.getElementById('wishlistCount');
+    const wishlistAlert = document.getElementById('wishlistAlert');
+    function showAlert(msg, type = 'success') {
+      wishlistAlert.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    }
+    // AJAX remove from wishlist
+    document.querySelectorAll('.toggle-wishlist-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const card = this.closest('[data-book-id]');
+        const bookId = card.getAttribute('data-book-id');
+        this.disabled = true;
+        const res = await fetch(`/api/wishlist/${bookId}`, { method: 'DELETE' });
+        if (res.ok) {
+          card.remove();
+          showAlert('Livre retiré des favoris.','success');
+          if (wishlistCount) wishlistCount.textContent = Math.max(0, +wishlistCount.textContent - 1);
+          // If no more books, show empty message
+          if (!document.querySelector('.col-md-4')) {
+            document.getElementById('wishlistBooksContainer').innerHTML = '<div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>';
+          }
+        } else {
+          showAlert('Erreur lors du retrait.','danger');
+        }
+        this.disabled = false;
+      });
+    });
+    // AJAX move to cart
+    document.querySelectorAll('.move-to-cart-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const card = this.closest('[data-book-id]');
+        const bookId = card.getAttribute('data-book-id');
+        this.disabled = true;
+        const res = await fetch(`/api/wishlist/${bookId}/move-to-cart`, { method: 'POST' });
+        if (res.ok) {
+          card.remove();
+          showAlert('Livre déplacé vers le panier.','success');
+          if (wishlistCount) wishlistCount.textContent = Math.max(0, +wishlistCount.textContent - 1);
+          if (!document.querySelector('.col-md-4')) {
+            document.getElementById('wishlistBooksContainer').innerHTML = '<div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>';
+          }
+        } else {
+          showAlert('Erreur lors du déplacement.','danger');
+        }
+        this.disabled = false;
+      });
+    });
+    // Real-time updates
+    let socket;
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof io !== 'undefined' && userId) {
+        socket = io({ transports: ['websocket', 'polling'] });
+        socket.on('wishlistUpdate', function(data) {
+          if (data && data.userId === userId) {
+            // Reload wishlist page if update is for this user
+            location.reload();
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
