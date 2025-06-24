@@ -71,6 +71,28 @@
 </head>
 <body>
   <%- include('../partials/navbar', { user }) %>
+  <% if (user && user.role === 1) { %>
+    <nav class="sidebar" style="min-height:100vh;background:linear-gradient(180deg,#6366f1 0%,#06b6d4 100%);color:#fff;padding:2rem 1rem;position:fixed;top:0;left:0;width:240px;z-index:100;box-shadow:2px 0 16px rgba(99,102,241,0.10);display:flex;flex-direction:column;gap:2rem;">
+      <div class="sidebar-logo" style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;text-align:center;letter-spacing:0.05em;">
+        <img src="/images/logo.png" alt="Logo" style="height:40px;vertical-align:middle;"> <span>Admin</span>
+      </div>
+      <a href="/dashboard" class="nav-link<%= page === 'dashboard' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+      <a href="/books/manage" class="nav-link<%= page === 'books' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-journal-text"></i> Gérer les livres</a>
+      <a href="/admin/users" class="nav-link<%= page === 'users' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
+      <a href="/admin/orders" class="nav-link<%= page === 'orders' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
+      <a href="/admin/emprunts" class="nav-link<%= page === 'emprunts' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
+      <a href="/admin/stock" class="nav-link<%= page === 'stock' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-seam"></i> Stock</a>
+      <% if (page === 'reviews') { %>
+        <a href="/admin/reviews" class="nav-link active" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;background:rgba(59,130,246,0.15);font-weight:600;"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <% } else { %>
+        <a href="/admin/reviews" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <% } %>
+      <a href="/logout" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+    </nav>
+    <div style="margin-left:260px;">
+  <% } else { %>
+    <div>
+  <% } %>
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-7 col-md-9">

@@ -25,78 +25,86 @@
     .badge-pending { background: #fff7e6; color: #b26a00; }
     .badge-approved { background: #e6f9f0; color: #1a7f5a; }
     .badge-rejected { background: #ffe6e6; color: #d32f2f; }
+    .sidebar { min-height: 100vh; background: linear-gradient(180deg, #6366f1 0%, #06b6d4 100%); color: #fff; padding: 2rem 1rem; position: fixed; top: 0; left: 0; width: 240px; z-index: 100; box-shadow: 2px 0 16px rgba(99,102,241,0.10); display: flex; flex-direction: column; gap: 2rem; }
+    .sidebar-logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align: center; letter-spacing: 0.05em; }
+    .nav-link { color: #fff; font-size: 1.1rem; margin-bottom: 1rem; border-radius: 0.75rem; padding: 0.7rem 1rem; display: flex; align-items: center; gap: 0.7rem; }
+    .nav-link.active { background: rgba(59,130,246,0.15); font-weight: 600; }
   </style>
 </head>
 <body>
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <img src="/images/logo.png" alt="Logo" style="height:40px;vertical-align:middle;"> <span>Admin</span>
-    </div>
-    <a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-    <a href="/books/manage" class="nav-link"><i class="bi bi-journal-text"></i> Gérer les livres</a>
-    <a href="/admin/users" class="nav-link"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
-    <a href="/admin/orders" class="nav-link"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
-    <a href="/admin/emprunts" class="nav-link"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
-    <a href="/admin/stock" class="nav-link"><i class="bi bi-box-seam"></i> Stock</a>
-    <a href="/admin/reviews" class="nav-link active"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
-    <a href="/logout" class="nav-link"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
-  </nav>
-  <div style="margin-left:260px;">
-    <div class="container py-5">
-      <div class="moderation-card">
-        <h2 class="mb-4"><i class="bi bi-chat-left-text me-2"></i>Modération des Avis & Notations</h2>
-        <div id="reviewsTable">
-          <!-- Les avis seront injectés dynamiquement par JS -->
+  <% if (user && user.role === 1) { %>
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/images/logo.png" alt="Logo" style="height:40px;vertical-align:middle;"> <span>Admin</span>
+      </div>
+      <a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+      <a href="/books/manage" class="nav-link"><i class="bi bi-journal-text"></i> Gérer les livres</a>
+      <a href="/admin/users" class="nav-link"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
+      <a href="/admin/orders" class="nav-link"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
+      <a href="/admin/emprunts" class="nav-link"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
+      <a href="/admin/stock" class="nav-link"><i class="bi bi-box-seam"></i> Stock</a>
+      <a href="/admin/reviews" class="nav-link active"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <a href="/logout" class="nav-link"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+    </nav>
+    <div style="margin-left:260px;">
+  <% } else { %>
+    <div>
+  <% } %>
+      <div class="container py-5">
+        <div class="moderation-card">
+          <h2 class="mb-4"><i class="bi bi-chat-left-text me-2"></i>Modération des Avis & Notations</h2>
+          <div id="reviewsTable">
+            <!-- Les avis seront injectés dynamiquement par JS -->
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Chargement et affichage des avis (scaffold, à compléter côté backend)
-    async function loadReviews() {
-      const res = await fetch('/api/admin/reviews');
-      const reviews = await res.json();
-      const table = document.getElementById('reviewsTable');
-      if (!Array.isArray(reviews) || reviews.length === 0) {
-        table.innerHTML = '<div class="alert alert-info text-center">Aucun avis à modérer.</div>';
-        return;
+    </div> <!-- end margin-left:260px -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Chargement et affichage des avis (scaffold, à compléter côté backend)
+      async function loadReviews() {
+        const res = await fetch('/api/admin/reviews');
+        const reviews = await res.json();
+        const table = document.getElementById('reviewsTable');
+        if (!Array.isArray(reviews) || reviews.length === 0) {
+          table.innerHTML = '<div class="alert alert-info text-center">Aucun avis à modérer.</div>';
+          return;
+        }
+        table.innerHTML = reviews.map(r => `
+          <div class="review-row d-flex align-items-center justify-content-between">
+            <div>
+              <b>${r.username || 'Utilisateur'}</b> sur <i>${r.bookTitle || 'Livre inconnu'}</i><br>
+              <span class="text-secondary">${r.text}</span><br>
+              <span class="badge ${r.status === 'approved' ? 'badge-approved' : r.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">${r.status || 'pending'}</span>
+              <span class="ms-2 text-warning">${r.rating ? '★'.repeat(r.rating) : ''}</span>
+            </div>
+            <div class="review-actions">
+              <button class="btn btn-success btn-sm" onclick="moderateReview('${r._id}','approve')"><i class="bi bi-check-circle"></i> Approuver</button>
+              <button class="btn btn-warning btn-sm" onclick="moderateReview('${r._id}','reject')"><i class="bi bi-x-circle"></i> Rejeter</button>
+              <button class="btn btn-danger btn-sm" onclick="moderateReview('${r._id}','delete')"><i class="bi bi-trash"></i> Supprimer</button>
+            </div>
+          </div>
+        `).join('');
       }
-      table.innerHTML = reviews.map(r => `
-        <div class="review-row d-flex align-items-center justify-content-between">
-          <div>
-            <b>${r.username || 'Utilisateur'}</b> sur <i>${r.bookTitle || 'Livre inconnu'}</i><br>
-            <span class="text-secondary">${r.text}</span><br>
-            <span class="badge ${r.status === 'approved' ? 'badge-approved' : r.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">${r.status || 'pending'}</span>
-            <span class="ms-2 text-warning">${r.rating ? '★'.repeat(r.rating) : ''}</span>
-          </div>
-          <div class="review-actions">
-            <button class="btn btn-success btn-sm" onclick="moderateReview('${r._id}','approve')"><i class="bi bi-check-circle"></i> Approuver</button>
-            <button class="btn btn-warning btn-sm" onclick="moderateReview('${r._id}','reject')"><i class="bi bi-x-circle"></i> Rejeter</button>
-            <button class="btn btn-danger btn-sm" onclick="moderateReview('${r._id}','delete')"><i class="bi bi-trash"></i> Supprimer</button>
-          </div>
-        </div>
-      `).join('');
-    }
-    loadReviews();
-    // Real-time update via Socket.io
-    if (typeof io !== 'undefined') {
-      const socket = io();
-      socket.on('reviewUpdate', function() {
-        loadReviews();
-      });
-    }
-    // Actions de modération (scaffold, à compléter côté backend)
-    async function moderateReview(id, action) {
-      let method = action === 'delete' ? 'DELETE' : 'PUT';
-      const res = await fetch(`/api/admin/reviews/${id}`, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: method === 'PUT' ? JSON.stringify({ action }) : undefined
-      });
-      if (res.ok) loadReviews();
-      else alert('Erreur lors de la modération.');
-    }
-  </script>
-</body>
+      loadReviews();
+      // Real-time update via Socket.io
+      if (typeof io !== 'undefined') {
+        const socket = io();
+        socket.on('reviewUpdate', function() {
+          loadReviews();
+        });
+      }
+      // Actions de modération (scaffold, à compléter côté backend)
+      async function moderateReview(id, action) {
+        let method = action === 'delete' ? 'DELETE' : 'PUT';
+        const res = await fetch(`/api/admin/reviews/${id}`, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: method === 'PUT' ? JSON.stringify({ action }) : undefined
+        });
+        if (res.ok) loadReviews();
+        else alert('Erreur lors de la modération.');
+      }
+    </script>
+  </body>
 </html>

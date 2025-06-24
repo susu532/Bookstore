@@ -49,131 +49,153 @@
   </style>
 </head>
 <body>
-  <%- include('../partials/navbar', { user }) %>
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="card card-glass shadow-lg border-0">
-          <div class="card-body">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
-              <h2 class="fw-bold mb-3 mb-md-0 text-primary">
-                <i class="bi bi-book-half me-2"></i>Gestion des Livres
-              </h2>
-              <a href="/admin/books/add?userId=<%= user._id %>" class="btn btn-gradient btn-lg shadow-sm">
-                <i class="bi bi-plus-circle me-2"></i>Ajouter un Livre
-              </a>
-            </div>
-            <form id="searchBooksForm" class="mb-4">
-              <div class="input-group input-group-lg">
-                <input type="text" class="form-control rounded-start" id="searchQuery" placeholder="Rechercher par titre, auteur ou genre...">
-                <button type="submit" class="btn btn-gradient rounded-end">
-                  <i class="bi bi-search"></i> Rechercher
-                </button>
+  <% if (user && user.role === 1) { %>
+    <nav class="sidebar" style="min-height:100vh;background:linear-gradient(180deg,#6366f1 0%,#06b6d4 100%);color:#fff;padding:2rem 1rem;position:fixed;top:0;left:0;width:240px;z-index:100;box-shadow:2px 0 16px rgba(99,102,241,0.10);display:flex;flex-direction:column;gap:2rem;">
+      <div class="sidebar-logo" style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;text-align:center;letter-spacing:0.05em;">
+        <img src="/images/logo.png" alt="Logo" style="height:40px;vertical-align:middle;"> <span>Admin</span>
+      </div>
+      <a href="/dashboard" class="nav-link<%= page === 'dashboard' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+      <a href="/books/manage" class="nav-link<%= page === 'books' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-journal-text"></i> Gérer les livres</a>
+      <a href="/admin/users" class="nav-link<%= page === 'users' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
+      <a href="/admin/orders" class="nav-link<%= page === 'orders' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
+      <a href="/admin/emprunts" class="nav-link<%= page === 'emprunts' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
+      <a href="/admin/stock" class="nav-link<%= page === 'stock' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-seam"></i> Stock</a>
+      <% if (page === 'reviews') { %>
+        <a href="/admin/reviews" class="nav-link active" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;background:rgba(59,130,246,0.15);font-weight:600;"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <% } else { %>
+        <a href="/admin/reviews" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <% } %>
+      <a href="/logout" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+    </nav>
+    <div style="margin-left:260px;">
+  <% } else { %>
+    <div>
+  <% } %>
+      <div class="container py-5">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="card card-glass shadow-lg border-0">
+              <div class="card-body">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4">
+                  <h2 class="fw-bold mb-3 mb-md-0 text-primary">
+                    <i class="bi bi-book-half me-2"></i>Gestion des Livres
+                  </h2>
+                  <a href="/admin/books/add?userId=<%= user._id %>" class="btn btn-gradient btn-lg shadow-sm">
+                    <i class="bi bi-plus-circle me-2"></i>Ajouter un Livre
+                  </a>
+                </div>
+                <form id="searchBooksForm" class="mb-4">
+                  <div class="input-group input-group-lg">
+                    <input type="text" class="form-control rounded-start" id="searchQuery" placeholder="Rechercher par titre, auteur ou genre...">
+                    <button type="submit" class="btn btn-gradient rounded-end">
+                      <i class="bi bi-search"></i> Rechercher
+                    </button>
+                  </div>
+                </form>
+                <div class="table-responsive rounded-3">
+                  <table class="table align-middle table-hover shadow-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col"><i class="bi bi-journal-text"></i> Titre</th>
+                        <th scope="col"><i class="bi bi-person"></i> Auteur</th>
+                        <th scope="col"><i class="bi bi-tags"></i> Genre</th>
+                        <th scope="col"><i class="bi bi-currency-euro"></i> Prix (€)</th>
+                        <th scope="col"><i class="bi bi-box"></i> Stock</th>
+                        <th scope="col"><i class="bi bi-image"></i> Couverture</th>
+                        <th scope="col"><i class="bi bi-gear"></i> Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                      <!-- Les livres seront injectés dynamiquement par JS -->
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </form>
-            <div class="table-responsive rounded-3">
-              <table class="table align-middle table-hover shadow-sm mb-0">
-                <thead>
-                  <tr>
-                    <th scope="col"><i class="bi bi-journal-text"></i> Titre</th>
-                    <th scope="col"><i class="bi bi-person"></i> Auteur</th>
-                    <th scope="col"><i class="bi bi-tags"></i> Genre</th>
-                    <th scope="col"><i class="bi bi-currency-euro"></i> Prix (€)</th>
-                    <th scope="col"><i class="bi bi-box"></i> Stock</th>
-                    <th scope="col"><i class="bi bi-image"></i> Couverture</th>
-                    <th scope="col"><i class="bi bi-gear"></i> Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="booksTableBody">
-                  <!-- Les livres seront injectés dynamiquement par JS -->
-                </tbody>
-              </table>
+            </div>
+            <div class="mt-5">
+              <%- include('partials/footer') %>
             </div>
           </div>
         </div>
-        <div class="mt-5">
-          <%- include('partials/footer') %>
-        </div>
       </div>
-    </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/client.js"></script>
-  <script>
-    // Helper to get the correct image URL for a book (support uploaded avatars and uploaded book covers)
-    function getBookImageUrl(image) {
-      if (!image || image.trim() === '') {
-        return '/images/books/default-cover.png';
-      }
-      // If image is an uploaded avatar or uploaded book cover
-      if (image.startsWith('/uploads/avatars/') || image.startsWith('/uploads/books/')) {
-        return image;
-      }
-      // If image is a full URL or absolute path
-      if (image.startsWith('/') || image.startsWith('http')) {
-        return image;
-      }
-      // Default: images/books
-      return '/images/books/' + image;
-    }
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="/js/client.js"></script>
+      <script>
+        // Helper to get the correct image URL for a book (support uploaded avatars and uploaded book covers)
+        function getBookImageUrl(image) {
+          if (!image || image.trim() === '') {
+            return '/images/books/default-cover.png';
+          }
+          // If image is an uploaded avatar or uploaded book cover
+          if (image.startsWith('/uploads/avatars/') || image.startsWith('/uploads/books/')) {
+            return image;
+          }
+          // If image is a full URL or absolute path
+          if (image.startsWith('/') || image.startsWith('http')) {
+            return image;
+          }
+          // Default: images/books
+          return '/images/books/' + image;
+        }
 
-    // Rendu dynamique des livres
-    function renderBooks(books) {
-      const tbody = document.getElementById('booksTableBody');
-      tbody.innerHTML = '';
-      books.forEach(book => {
-        const imageUrl = getBookImageUrl(book.image);
-        tbody.innerHTML += `
-          <tr>
-            <td class="fw-semibold text-primary">${book.title}</td>
-            <td>${book.author}</td>
-            <td><span class="badge bg-info bg-gradient text-dark px-3 py-2 fs-6">${book.genre}</span></td>
-            <td><span class="fw-bold text-success">${book.price}</span></td>
-            <td>
-              ${book.stock > 5 ? `<span class='badge bg-success bg-gradient px-3 py-2'>${book.stock}</span>` : book.stock > 0 ? `<span class='badge bg-warning bg-gradient text-dark px-3 py-2'>${book.stock}</span>` : `<span class='badge bg-danger bg-gradient px-3 py-2'>Rupture</span>`}
-            </td>
-            <td>${imageUrl ? `<img src='${imageUrl}' alt='Couverture' style='width:48px;height:64px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;' onerror="this.onerror=null;this.src='/images/books/default-cover.png';">` : `<span class='text-muted'>Aucune</span>`}</td>
-            <td>
-              <a href="/admin/books/edit/${book._id}?userId=${book.userId || ''}" class="btn btn-sm btn-outline-primary me-2 mb-1">
-                <i class="bi bi-pencil-square"></i>
-              </a>
-              <button onclick="deleteBook('${book._id}')" class="btn btn-sm btn-outline-danger mb-1">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-    }
+        // Rendu dynamique des livres
+        function renderBooks(books) {
+          const tbody = document.getElementById('booksTableBody');
+          tbody.innerHTML = '';
+          books.forEach(book => {
+            const imageUrl = getBookImageUrl(book.image);
+            tbody.innerHTML += `
+              <tr>
+                <td class="fw-semibold text-primary">${book.title}</td>
+                <td>${book.author}</td>
+                <td><span class="badge bg-info bg-gradient text-dark px-3 py-2 fs-6">${book.genre}</span></td>
+                <td><span class="fw-bold text-success">${book.price}</span></td>
+                <td>
+                  ${book.stock > 5 ? `<span class='badge bg-success bg-gradient px-3 py-2'>${book.stock}</span>` : book.stock > 0 ? `<span class='badge bg-warning bg-gradient text-dark px-3 py-2'>${book.stock}</span>` : `<span class='badge bg-danger bg-gradient px-3 py-2'>Rupture</span>`}
+                </td>
+                <td>${imageUrl ? `<img src='${imageUrl}' alt='Couverture' style='width:48px;height:64px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;' onerror="this.onerror=null;this.src='/images/books/default-cover.png';">` : `<span class='text-muted'>Aucune</span>`}</td>
+                <td>
+                  <a href="/admin/books/edit/${book._id}?userId=${book.userId || ''}" class="btn btn-sm btn-outline-primary me-2 mb-1">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                  <button onclick="deleteBook('${book._id}')" class="btn btn-sm btn-outline-danger mb-1">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        }
 
-    // Charger tous les livres au chargement de la page
-    async function loadAllBooks() {
-      const res = await fetch('/api/books');
-      const books = await res.json();
-      renderBooks(books);
-    }
-    document.addEventListener('DOMContentLoaded', loadAllBooks);
+        // Charger tous les livres au chargement de la page
+        async function loadAllBooks() {
+          const res = await fetch('/api/books');
+          const books = await res.json();
+          renderBooks(books);
+        }
+        document.addEventListener('DOMContentLoaded', loadAllBooks);
 
-    // Recherche dynamique
-    document.getElementById('searchBooksForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const query = document.getElementById('searchQuery').value;
-      const res = await fetch(`/api/books/search?query=${encodeURIComponent(query)}`);
-      const books = await res.json();
-      renderBooks(books);
-    });
+        // Recherche dynamique
+        document.getElementById('searchBooksForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const query = document.getElementById('searchQuery').value;
+          const res = await fetch(`/api/books/search?query=${encodeURIComponent(query)}`);
+          const books = await res.json();
+          renderBooks(books);
+        });
 
-    // Suppression dynamique
-    async function deleteBook(bookId) {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer ce livre ?')) return;
-      const res = await fetch(`/api/books/${bookId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (res.ok) {
-        await loadAllBooks();
-      } else {
-        alert(data.message || 'Erreur lors de la suppression');
-      }
-    }
-  </script>
-</body>
+        // Suppression dynamique
+        async function deleteBook(bookId) {
+          if (!confirm('Êtes-vous sûr de vouloir supprimer ce livre ?')) return;
+          const res = await fetch(`/api/books/${bookId}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (res.ok) {
+            await loadAllBooks();
+          } else {
+            alert(data.message || 'Erreur lors de la suppression');
+          }
+        }
+      </script>
+    </div> <!-- end margin-left:260px -->
+  </body>
 </html>

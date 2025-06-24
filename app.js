@@ -164,6 +164,9 @@ app.get('/admin/emprunts', checkAuth, checkAdmin, async (req, res) => {
   const emprunts = await Emprunt.find().populate('user').populate('book');
   res.render('admin/emprunts', { user: req.user, emprunts });
 });
+app.get('/admin/reviews', checkAuth, checkAdmin, (req, res) => {
+  res.render('admin/reviews', { user: req.user });
+});
 
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);

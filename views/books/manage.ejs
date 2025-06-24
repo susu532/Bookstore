@@ -72,13 +72,17 @@
       <div class="sidebar-logo" style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;text-align:center;letter-spacing:0.05em;">
         <img src="/images/logo.png" alt="Logo" style="height:40px;vertical-align:middle;"> <span>Admin</span>
       </div>
-      <a href="/dashboard" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
-      <a href="/books/manage" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-journal-text"></i> Gérer les livres</a>
-      <a href="/admin/users" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
-      <a href="/admin/orders" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
-      <a href="/admin/emprunts" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
-      <a href="/admin/stock" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-seam"></i> Stock</a>
-      
+      <a href="/dashboard" class="nav-link<%= page === 'dashboard' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+      <a href="/books/manage" class="nav-link<%= page === 'books' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-journal-text"></i> Gérer les livres</a>
+      <a href="/admin/users" class="nav-link<%= page === 'users' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
+      <a href="/admin/orders" class="nav-link<%= page === 'orders' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
+      <a href="/admin/emprunts" class="nav-link<%= page === 'emprunts' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
+      <a href="/admin/stock" class="nav-link<%= page === 'stock' ? ' active' : '' %>" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-seam"></i> Stock</a>
+      <% if (page === 'reviews') { %>
+        <a href="/admin/reviews" class="nav-link active" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;background:rgba(59,130,246,0.15);font-weight:600;"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <% } else { %>
+        <a href="/admin/reviews" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-chat-left-text"></i> Modération Avis</a>
+      <% } %>
       <a href="/logout" class="nav-link" style="color:#fff;font-size:1.1rem;margin-bottom:1rem;border-radius:0.75rem;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.7rem;"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
     </nav>
     <div style="margin-left:260px;">
