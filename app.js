@@ -171,6 +171,7 @@ app.set('io', io); // Make io accessible in routes
 
 // --- Gamification Real-Time: Track user connections ---
 const userSocketMap = new Map(); // userId -> Set of socketIds
+app.set('userSocketMap', userSocketMap); // Make userSocketMap accessible in routes
 
 io.on('connection', (socket) => {
   // Listen for user identification from client

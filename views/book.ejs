@@ -71,6 +71,26 @@
 </head>
 <body>
   <%- include('partials/navbar', { user }) %>
+  <!-- Wishlist Navbar Widget -->
+  <% if (user) { %>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-2">
+      <div class="container-fluid">
+        <!-- ...existing navbar content... -->
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <!-- ...other nav items... -->
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="/wishlist" id="wishlistNavLink">
+              <i class="bi bi-heart-fill text-danger"></i>
+              <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.8em;">
+                <%= user.wishlist ? user.wishlist.length : 0 %>
+              </span>
+              Favoris
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  <% } %>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-7 col-md-9">
@@ -78,11 +98,13 @@
           <div class="row g-4 align-items-center">
             <div class="col-md-5 text-center mb-3 mb-md-0">
               <% if (book.image) { %>
-                <img src="<%= book.image %>" alt="Couverture" class="img-fluid rounded shadow" style="height:130px;width:100px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;">
+                <img src="<%= book.image %>" alt="Couverture" class="img-fluid rounded shadow"
+                  style="height:320px;width:240px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;">
               <% } else { %>
-                <img src="/images/books/default-cover.png" alt="Couverture par défaut" class="img-fluid rounded shadow" style="height:130px;width:100px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;">
+                <img src="/images/books/default-cover.png" alt="Couverture par défaut" class="img-fluid rounded shadow"
+                  style="height:320px;width:240px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;">
                 <!-- Alternatively, use DiceBear fallback: -->
-                <!-- <img src="https://api.dicebear.com/7.x/initials/svg?seed=<%= encodeURIComponent(book.title || 'B') %>" alt="Couverture générée" class="img-fluid rounded shadow" style="height:130px;width:100px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;"> -->
+                <!-- <img src="https://api.dicebear.com/7.x/initials/svg?seed=<%= encodeURIComponent(book.title || 'B') %>" alt="Couverture générée" class="img-fluid rounded shadow" style="height:320px;width:240px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;display:block;margin:auto;"> -->
               <% } %>
             </div>
             <div class="col-md-7">
@@ -90,6 +112,20 @@
                 <h2 class="book-title mb-0"><%= book.title %></h2>
                 <span class="badge badge-genre ms-2"><%= book.genre %></span>
               </div>
+              <!-- Wishlist/Favorites Button -->
+              <% if (user) { %>
+                <div class="mb-2">
+                  <button id="wishlistBtn" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi <%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'bi-heart-fill text-danger' : 'bi-heart' %>"></i>
+                    <span id="wishlistBtnText"><%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'Retirer des favoris' : 'Ajouter aux favoris' %></span>
+                  </button>
+                  <% if (user.wishlist && user.wishlist.includes(book._id.toString())) { %>
+                    <button id="moveToCartBtn" class="btn btn-outline-primary btn-sm ms-2">
+                      <i class="bi bi-cart-plus"></i> Déplacer vers le panier
+                    </button>
+                  <% } %>
+                </div>
+              <% } %>
               <p class="mb-2"><strong class="text-primary">Auteur :</strong> <span class="text-dark"><%= book.author %></span></p>
               <p class="mb-2"><strong class="text-primary">Prix :</strong> <span class="price-tag"><%= book.price %> €</span></p>
               <p class="mb-2"><strong class="text-primary">Description :</strong> <span class="text-secondary"><%= book.description || 'Aucune description disponible' %></span></p>
@@ -162,6 +198,8 @@
     <%- include('partials/footer') %>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Socket.io client for real-time wishlist -->
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     // Bootstrap validation
     (() => {
@@ -353,6 +391,89 @@
     updateEnvoyerBtn();
   </script>
   <% } %>
+  <script>
+    // Wishlist/Favorites logic
+    <% if (user) { %>
+    const wishlistBtn = document.getElementById('wishlistBtn');
+    const wishlistBtnText = document.getElementById('wishlistBtnText');
+    let moveToCartBtn = document.getElementById('moveToCartBtn');
+    let inWishlist = <%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'true' : 'false' %>;
+    const wishlistCount = document.getElementById('wishlistCount');
+    // Always connect socket after DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      // Only connect if user is present
+      let socket;
+      if (typeof io !== 'undefined') {
+        socket = io({ transports: ['websocket', 'polling'] });
+      }
+
+      function updateWishlistCount(count) {
+        if (wishlistCount) wishlistCount.textContent = count;
+      }
+
+      if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', async function() {
+          if (!inWishlist) {
+            const res = await fetch('/api/wishlist/<%= book._id %>', { method: 'POST' });
+            if (res.ok) {
+              inWishlist = true;
+              wishlistBtn.querySelector('i').classList.remove('bi-heart');
+              wishlistBtn.querySelector('i').classList.add('bi-heart-fill', 'text-danger');
+              wishlistBtnText.textContent = 'Retirer des favoris';
+              if (!moveToCartBtn) {
+                moveToCartBtn = document.createElement('button');
+                moveToCartBtn.id = 'moveToCartBtn';
+                moveToCartBtn.className = 'btn btn-outline-primary btn-sm ms-2';
+                moveToCartBtn.innerHTML = '<i class="bi bi-cart-plus"></i> Déplacer vers le panier';
+                wishlistBtn.parentNode.appendChild(moveToCartBtn);
+                moveToCartBtn.addEventListener('click', moveToCartHandler);
+              }
+              if (socket) socket.emit('wishlistChanged', { userId: '<%= user._id %>' });
+            }
+          } else {
+            const res = await fetch('/api/wishlist/<%= book._id %>', { method: 'DELETE' });
+            if (res.ok) {
+              inWishlist = false;
+              wishlistBtn.querySelector('i').classList.remove('bi-heart-fill', 'text-danger');
+              wishlistBtn.querySelector('i').classList.add('bi-heart');
+              wishlistBtnText.textContent = 'Ajouter aux favoris';
+              if (moveToCartBtn) { moveToCartBtn.remove(); moveToCartBtn = null; }
+              if (socket) socket.emit('wishlistChanged', { userId: '<%= user._id %>' });
+            }
+          }
+        });
+      }
+      function moveToCartHandler() {
+        fetch('/api/wishlist/<%= book._id %>/move-to-cart', { method: 'POST' })
+          .then(res => {
+            if (res.ok) {
+              alert('Déplacé vers le panier !');
+              if (wishlistBtn) {
+                inWishlist = false;
+                wishlistBtn.querySelector('i').classList.remove('bi-heart-fill', 'text-danger');
+                wishlistBtn.querySelector('i').classList.add('bi-heart');
+                wishlistBtnText.textContent = 'Ajouter aux favoris';
+              }
+              if (moveToCartBtn) { moveToCartBtn.remove(); moveToCartBtn = null; }
+              if (socket) socket.emit('wishlistChanged', { userId: '<%= user._id %>' });
+            } else {
+              alert('Erreur lors du déplacement vers le panier.');
+            }
+          });
+      }
+      if (moveToCartBtn) moveToCartBtn.addEventListener('click', moveToCartHandler);
+
+      // Listen for real-time wishlist updates
+      if (socket) {
+        socket.on('wishlistUpdate', function(data) {
+          if (data && data.userId === '<%= user._id %>') {
+            updateWishlistCount(data.count);
+          }
+        });
+      }
+    });
+    <% } %>
+  </script>
   <script src="/js/client.js"></script>
 </body>
 </html>

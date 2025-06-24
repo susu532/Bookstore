@@ -182,6 +182,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Récupérer un livre par ID (API) - placed after all more specific routes
+router.get('/:bookId', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.bookId);
+    if (!book) {
+      return res.status(404).json({ message: 'Livre non trouvé' });
+    }
+    const bookObj = book.toObject();
+    if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+    res.json(bookObj);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 // Ajouter un commentaire, une note, un like/dislike
 router.post('/:bookId/comment', async (req, res) => {
   if (!req.user || !req.user._id) return res.status(401).json({ message: 'Vous devez être connecté pour commenter.' });
