@@ -199,10 +199,14 @@
         for (let i = 1; i <= 5; i++) {
           stars += `<i class='bi ${i <= (c.rating || 0) ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}'></i>`;
         }
+        // Avatar logic: use c.avatar if present, else fallback
+        const avatarImg = c.avatar
+          ? `<img src="${c.avatar}" alt="avatar" class="rounded-circle me-2 comment-avatar" data-userid="${c.user}" style="width:36px;height:36px;object-fit:cover;">`
+          : `<img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.username || 'U')}" alt="avatar" class="rounded-circle me-2 comment-avatar" data-userid="${c.user}" style="width:36px;height:36px;object-fit:cover;">`;
         return `
           <div class="border rounded p-2 mb-2 comment-item" data-comment-id="${c._id}">
             <div class="d-flex align-items-center mb-1">
-              <img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.username || 'U')}" alt="avatar" class="rounded-circle me-2" style="width:36px;height:36px;object-fit:cover;">
+              ${avatarImg}
               <span class="fw-bold me-2">${c.username || 'Utilisateur'}</span>
               <span class="ms-2">${stars}</span>
               ${c.like ? '<i class="bi bi-hand-thumbs-up-fill text-success ms-2" title="Like"></i>' : ''}

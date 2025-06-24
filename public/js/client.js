@@ -79,21 +79,25 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
   }
 });
 
-// Mise à jour du profil
+// Mise à jour du profil (AJAX, supporte avatar)
 document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value || undefined;
+  const form = document.getElementById('profileForm');
+  const formData = new FormData(form);
   const res = await fetch('/api/users/profile', {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password })
+    body: formData
   });
   const data = await res.json();
   if (res.ok) {
     showNotification(data.message, 'success');
-    window.location.reload();
+    // Mettre à jour l'avatar sur la page sans recharger
+    if (data.avatar) {
+      const avatarImg = document.querySelector('.profile-avatar img');
+      if (avatarImg) {
+        avatarImg.src = data.avatar + '?t=' + Date.now();
+      }
+    }
   } else {
     showNotification(data.message || 'Erreur lors de la mise à jour', 'error');
   }

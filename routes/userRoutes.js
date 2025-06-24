@@ -95,6 +95,13 @@ router.put('/profile', upload.single('avatar'), async (req, res) => {
       user.avatar = '/uploads/avatars/' + req.file.filename;
     }
     await user.save();
+
+    // Emit avatar update event via socket.io
+    const io = req.app.get('io');
+    if (io && user.avatar) {
+      io.emit('avatarUpdated', { userId: user._id.toString(), avatar: user.avatar });
+    }
+
     res.json({ message: 'Profil mis à jour avec succès', avatar: user.avatar });
   } catch (err) {
     console.error('Erreur lors de la mise à jour du profil :', err);

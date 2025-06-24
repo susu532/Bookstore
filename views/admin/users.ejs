@@ -121,7 +121,10 @@
         if(user.role !== 1) {
           tbody.innerHTML += `
             <tr data-user-id="${user._id}">
-              <td class="fw-semibold">${user.name}</td>
+              <td class="fw-semibold d-flex align-items-center">
+                ${user.avatar ? `<img src="${user.avatar}" alt="Avatar" class="admin-user-avatar me-2" data-userid="${user._id}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` : `<i class='bi bi-person-circle admin-user-avatar me-2' style='font-size:2rem;'></i>`}
+                ${user.name}
+              </td>
               <td>${user.email}</td>
               <td><span class="badge badge-user">Utilisateur</span></td>
               <td><span class="badge ${user.isActive ? 'bg-success' : 'bg-danger'}">${user.isActive ? 'Oui' : 'Non'}</span></td>

@@ -170,8 +170,24 @@ router.post('/:bookId/comment', async (req, res) => {
 // Récupérer les commentaires d'un livre
 router.get('/:bookId/comments', async (req, res) => {
   try {
-    const comments = await Comment.find({ book: req.params.bookId }).sort({ createdAt: -1 });
-    res.json(comments);
+    // Populate user to get avatar and name
+    const comments = await Comment.find({ book: req.params.bookId })
+      .sort({ createdAt: -1 })
+      .populate('user', 'avatar name');
+    // Map to include avatar in each comment
+    const commentsWithAvatar = comments.map(c => ({
+      _id: c._id,
+      book: c.book,
+      user: c.user?._id?.toString() || '',
+      username: c.username,
+      text: c.text,
+      rating: c.rating,
+      like: c.like,
+      dislike: c.dislike,
+      createdAt: c.createdAt,
+      avatar: c.user?.avatar || null
+    }));
+    res.json(commentsWithAvatar);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
   }

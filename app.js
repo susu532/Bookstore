@@ -164,5 +164,9 @@ app.get('/admin/emprunts', checkAuth, checkAdmin, async (req, res) => {
   res.render('admin/emprunts', { user: req.user, emprunts });
 });
 
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+app.set('io', io); // Make io accessible in routes
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
+server.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
