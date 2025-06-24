@@ -4,6 +4,63 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const Book = require('../models/Book');
 const Emprunt = require('../models/Emprunt');
+const Comment = require('../models/Comment');
+
+// --- MODÉRATION DES AVIS ---
+// GET all reviews
+router.get('/reviews', async (req, res) => {
+  try {
+    const reviews = await Comment.find({})
+      .populate('book', 'title')
+      .populate('user', 'name');
+    res.json(reviews.map(r => ({
+      _id: r._id,
+      bookTitle: r.book && r.book.title ? r.book.title : '',
+      username: r.user && r.user.name ? r.user.name : r.username,
+      text: r.text,
+      rating: r.rating,
+      status: r.status || 'pending',
+      like: r.like,
+      dislike: r.dislike
+    })));
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+// Count pending reviews
+router.get('/reviews/count', async (req, res) => {
+  try {
+    const count = await Comment.countDocuments({ status: 'pending' });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+// Approve/Reject/Delete review
+router.put('/reviews/:id', async (req, res) => {
+  try {
+    const { action } = req.body;
+    const review = await Comment.findById(req.params.id);
+    if (!review) return res.status(404).json({ message: 'Avis non trouvé' });
+    if (action === 'approve') review.status = 'approved';
+    else if (action === 'reject') review.status = 'rejected';
+    await review.save();
+    // Socket.io real-time
+    req.app.get('io').emit('reviewUpdate');
+    res.json({ message: 'Avis modifié' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+router.delete('/reviews/:id', async (req, res) => {
+  try {
+    await Comment.findByIdAndDelete(req.params.id);
+    req.app.get('io').emit('reviewUpdate');
+    res.json({ message: 'Avis supprimé' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
 
 // Activer/Désactiver un utilisateur
 router.patch('/users/:userId', async (req, res) => {

@@ -198,7 +198,7 @@
     <a href="/admin/orders" class="nav-link"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
     <a href="/admin/emprunts" class="nav-link"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
     <a href="/admin/stock" class="nav-link"><i class="bi bi-box-seam"></i> Stock</a>
-    <a href="/profile" class="nav-link"><i class="bi bi-person-circle"></i> Profil</a>
+    <a href="/admin/reviews" class="nav-link"><i class="bi bi-chat-left-text"></i> Modération Avis <span id="pendingReviewsCount" class="badge bg-danger ms-1" style="display:none;">0</span></a>
     <a href="/logout" class="nav-link"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
   </nav>
   <% } %>
@@ -324,6 +324,25 @@
         }
       });
     }
+    // Affichage dynamique du nombre d'avis à modérer
+    document.addEventListener('DOMContentLoaded', function() {
+      var badge = document.getElementById('pendingReviewsCount');
+      if (!badge) return;
+      async function updatePendingReviewsCount() {
+        try {
+          const res = await fetch('/api/admin/reviews/count?status=pending');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (badge && data.count > 0) {
+            badge.textContent = data.count;
+            badge.style.display = 'inline-block';
+          } else if (badge) {
+            badge.style.display = 'none';
+          }
+        } catch {}
+      }
+      updatePendingReviewsCount();
+    });
   </script>
   <% } %>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
