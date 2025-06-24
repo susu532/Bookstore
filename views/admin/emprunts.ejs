@@ -159,12 +159,16 @@
             <% emprunts.forEach(e => { %>
               <tr>
                 <td>
-                  <span class="badge-modern badge-info">
-                    <i class="bi bi-person-circle"></i>
-                    <%= e.user.name %>
-                  </span>
-                  <br>
-                  <small style="color:#6c757d;"><%= e.user.email %></small>
+                  <% if (e.user) { %>
+                    <span class="badge-modern badge-info">
+                      <i class="bi bi-person-circle"></i>
+                      <%= e.user.name %>
+                    </span>
+                    <br>
+                    <small style="color:#6c757d;"><%= e.user.email %></small>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Utilisateur inconnu</span>
+                  <% } %>
                 </td>
                 <td>
                   <span class="badge-modern badge-info">

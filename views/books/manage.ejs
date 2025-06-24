@@ -110,7 +110,19 @@
             </div>
             <div class="mb-3">
               <label for="genre" class="form-label">Genre</label>
-              <input type="text" class="form-control" id="genre" name="genre" required placeholder="Ex: Roman">
+              <select class="form-control" id="genre" name="genre" required multiple>
+                <option value="Roman">Roman</option>
+                <option value="Science-fiction">Science-fiction</option>
+                <option value="Fantastique">Fantastique</option>
+                <option value="Policier">Policier</option>
+                <option value="Biographie">Biographie</option>
+                <option value="Histoire">Histoire</option>
+                <option value="Jeunesse">Jeunesse</option>
+                <option value="Poésie">Poésie</option>
+                <option value="Essai">Essai</option>
+                <option value="Autre">Autre</option>
+              </select>
+              <small class="text-muted">(Ctrl+clic pour sélectionner plusieurs genres)</small>
             </div>
             <div class="mb-3">
               <label for="price" class="form-label">Prix (€)</label>
@@ -158,7 +170,13 @@
                   <tr data-book-id="<%= book._id %>">
                     <td><%= book.title %></td>
                     <td><%= book.author %></td>
-                    <td><span class="badge bg-info bg-gradient text-dark"><%= book.genre %></span></td>
+                    <td><span class="badge bg-info bg-gradient text-dark">
+  <% if (Array.isArray(book.genre)) { %>
+    <%= book.genre.join(', ') %>
+  <% } else { %>
+    <%= book.genre %>
+  <% } %>
+</span></td>
                     <td><span class="fw-bold text-success"><%= book.price %></span></td>
                     <td>
                       <% if (book.stock > 5) { %>
@@ -173,9 +191,9 @@
                       <button
                         onclick="editBook(
                           '<%= book._id %>',
-                          '<%- book.title.replace(/'/g, '\\&#39;') %>',
-                          '<%- book.author.replace(/'/g, '\\&#39;') %>',
-                          '<%- book.genre.replace(/'/g, '\\&#39;') %>',
+                          '<%- book.title.replace(/'/g, '\&#39;') %>',
+                          '<%- book.author.replace(/'/g, '\&#39;') %>',
+                          <%= Array.isArray(book.genre) ? JSON.stringify(book.genre) : `'${book.genre}'` %>,
                           '<%= book.price %>',
                           '<%= book.stock %>'
                         )"
@@ -201,7 +219,7 @@
   
   <footer class="bg-white border-top py-4 mt-5">
     <div class="container text-center">
-      <%- include('partials/footer') %>
+      <%- include('../partials/footer') %>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
