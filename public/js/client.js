@@ -277,6 +277,7 @@ async function emprunterLivre(bookId) {
   const data = await res.json();
   if (res.ok) {
     showNotification('Livre emprunté avec succès', 'success');
+    if (data.gamification) updateGamificationBar(data.gamification);
     window.location.href = '/emprunts';
   } else {
     showNotification(data.message || 'Erreur lors de l\'emprunt', 'error');

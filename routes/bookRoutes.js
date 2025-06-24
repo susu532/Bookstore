@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
 const Comment = require('../models/Comment');
+const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
 
@@ -142,7 +143,25 @@ router.post('/:bookId/comment', async (req, res) => {
       dislike: !!dislike
     });
     await comment.save();
-    res.json({ message: 'Commentaire ajouté', comment });
+    // Gamification: add points, level up, and badges
+    const user = await User.findById(req.user._id);
+    let pointsEarned = 10;
+    if (rating) pointsEarned += 5;
+    if (like || dislike) pointsEarned += 2;
+    user.points += pointsEarned;
+    // Level up every 100 points
+    if (user.points >= 100) {
+      user.level += 1;
+      user.points = user.points - 100;
+      if (!user.badges.includes('Nouveau niveau')) user.badges.push('Nouveau niveau');
+    }
+    // Add badges for first comment, first rating, etc.
+    if (user.badges.indexOf('💬 Commentateur') === -1 && text) user.badges.push('💬 Commentateur');
+    if (user.badges.indexOf('⭐ Critique') === -1 && rating) user.badges.push('⭐ Critique');
+    if (user.badges.indexOf('👍 Likeur') === -1 && like) user.badges.push('👍 Likeur');
+    if (user.badges.indexOf('👎 Dislikeur') === -1 && dislike) user.badges.push('👎 Dislikeur');
+    await user.save();
+    res.json({ message: 'Commentaire ajouté', comment, gamification: { points: user.points, level: user.level, badges: user.badges } });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
   }

@@ -3,6 +3,20 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { check, validationResult } = require('express-validator');
 const User = require('../models/User');
+const multer = require('multer');
+const path = require('path');
+
+// Multer config for avatar uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../public/uploads/avatars'));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, req.body.userId + '_' + Date.now() + ext);
+  }
+});
+const upload = multer({ storage });
 
 // Inscription
 router.post('/register', [
@@ -65,7 +79,7 @@ router.post('/login', [
 });
 
 // Mise à jour du profil
-router.put('/profile', async (req, res) => {
+router.put('/profile', upload.single('avatar'), async (req, res) => {
   const { userId, name, email, password } = req.body;
   try {
     const user = await User.findById(userId);
@@ -77,8 +91,11 @@ router.put('/profile', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       user.password = hashedPassword;
     }
+    if (req.file) {
+      user.avatar = '/uploads/avatars/' + req.file.filename;
+    }
     await user.save();
-    res.json({ message: 'Profil mis à jour avec succès' });
+    res.json({ message: 'Profil mis à jour avec succès', avatar: user.avatar });
   } catch (err) {
     console.error('Erreur lors de la mise à jour du profil :', err);
     res.status(500).json({ message: 'Erreur serveur' });

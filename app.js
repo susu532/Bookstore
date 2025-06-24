@@ -37,6 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 // Serve book images from /public/images/books at /images/books
 app.use('/images/books', express.static(path.join(__dirname, 'public/images/books')));
+// Serve avatar images from /public/uploads/avatars at /uploads/avatars
+app.use('/uploads/avatars', express.static(path.join(__dirname, 'public/uploads/avatars')));
 
 // Configuration EJS
 app.set('view engine', 'ejs');

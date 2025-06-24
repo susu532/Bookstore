@@ -65,6 +65,22 @@
 <body>
   <%- include('partials/navbar') %>
   <div class="container py-4">
+    <% if (user) { %>
+    <div class="mb-4 p-3 rounded shadow-sm bg-white d-flex align-items-center gap-4" style="border-left:6px solid #6366f1;">
+      <div>
+        <div class="fw-bold text-primary" style="font-size:1.2rem;">🎮 Gamification</div>
+        <div class="d-flex align-items-center gap-3 mt-2">
+          <span class="badge bg-success" style="font-size:1.1rem;">Points : <span id="userPoints">120</span></span>
+          <span class="badge bg-warning text-dark" style="font-size:1.1rem;">Niveau : <span id="userLevel">2</span></span>
+          <span class="badge bg-info text-dark" style="font-size:1.1rem;">Badges : <span id="userBadges">📚 Bookworm, 💬 Commentateur</span></span>
+        </div>
+        <div class="progress mt-3" style="height:8px;max-width:300px;">
+          <div class="progress-bar bg-primary" id="levelProgress" role="progressbar" style="width:60%"></div>
+        </div>
+        <small class="text-muted">Gagnez des points en commentant, empruntant ou notant des livres !</small>
+      </div>
+    </div>
+    <% } %>
     <div class="books-header mb-4">
       <h2 class="mb-2 d-flex align-items-center justify-content-center">
         <svg width="32" height="32" fill="currentColor" class="me-2" viewBox="0 0 16 16"><path d="M2 2v12h12V2H2zm11 11H3V3h10v10z"/><path d="M4 4h8v1H4V4zm0 2h8v1H4V6zm0 2h8v1H4V8zm0 2h5v1H4v-1z"/></svg>
@@ -169,6 +185,40 @@
       const books = await res.json();
       renderBooks(books);
     });
+
+    // Update gamification bar in real time
+    function updateGamificationBar(data) {
+      if (!data) return;
+      if (data.points !== undefined) document.getElementById('userPoints').textContent = data.points;
+      if (data.level !== undefined) document.getElementById('userLevel').textContent = data.level;
+      if (data.badges && data.badges.length) document.getElementById('userBadges').textContent = data.badges.join(', ');
+      // Progress bar: percent to next level (assuming 100 points per level)
+      if (data.points !== undefined) {
+        const percent = Math.min(100, Math.round((data.points / 100) * 100));
+        document.getElementById('levelProgress').style.width = percent + '%';
+      }
+    }
+
+    // Listen for comment form submission and update gamification bar
+    if (document.getElementById('commentForm')) {
+      document.getElementById('commentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const text = document.getElementById('commentText').value.trim();
+        const rating = window.selectedRating || 0;
+        const like = window.like || false;
+        const dislike = window.dislike || false;
+        const bookId = window.bookId || (typeof bookId !== 'undefined' ? bookId : null);
+        if (!bookId) return;
+        const res = await fetch(`/api/books/${bookId}/comment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, rating, like, dislike })
+        });
+        const data = await res.json();
+        if (data.gamification) updateGamificationBar(data.gamification);
+        // ...existing code for comment UI refresh...
+      });
+    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

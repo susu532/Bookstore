@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Emprunt = require('../models/Emprunt');
 const Book = require('../models/Book');
+const User = require('../models/User');
 
 // Créer un emprunt
 router.post('/', async (req, res) => {
@@ -18,7 +19,18 @@ router.post('/', async (req, res) => {
     await emprunt.save();
     book.stock -= 1;
     await book.save();
-    res.status(201).json({ message: 'Emprunt créé', emprunt });
+    // Gamification: add points, level up, and badges
+    const user = await User.findById(userId);
+    let pointsEarned = 20; // More points for borrowing
+    user.points += pointsEarned;
+    if (user.points >= 100) {
+      user.level += 1;
+      user.points = user.points - 100;
+      if (!user.badges.includes('Nouveau niveau')) user.badges.push('Nouveau niveau');
+    }
+    if (user.badges.indexOf('📚 Bookworm') === -1) user.badges.push('📚 Bookworm');
+    await user.save();
+    res.status(201).json({ message: 'Emprunt créé', emprunt, gamification: { points: user.points, level: user.level, badges: user.badges } });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
   }
@@ -46,7 +58,18 @@ router.put('/return/:id', async (req, res) => {
     await emprunt.save();
     emprunt.book.stock += 1;
     await emprunt.book.save();
-    res.json({ message: 'Livre retourné', emprunt });
+    // Gamification: add points for returning
+    const user = await User.findById(emprunt.user);
+    let pointsEarned = 10; // Points for returning
+    user.points += pointsEarned;
+    if (user.points >= 100) {
+      user.level += 1;
+      user.points = user.points - 100;
+      if (!user.badges.includes('Nouveau niveau')) user.badges.push('Nouveau niveau');
+    }
+    if (user.badges.indexOf('🔄 Retourneur') === -1) user.badges.push('🔄 Retourneur');
+    await user.save();
+    res.json({ message: 'Livre retourné', emprunt, gamification: { points: user.points, level: user.level, badges: user.badges } });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur' });
   }

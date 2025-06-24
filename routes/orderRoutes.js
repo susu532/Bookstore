@@ -60,6 +60,21 @@ router.post('/checkout', async (req, res) => {
     const order = new Order({ user: userId, books: cart.books, total });
     await order.save();
     await Cart.deleteOne({ user: userId });
+
+    // Gamification: add points and badge for order
+    const User = require('../models/User');
+    const user = await User.findById(userId);
+    if (user) {
+      user.points += 20; // +20 points for an order
+      if (user.points >= 100) {
+        user.level += 1;
+        user.points = user.points - 100;
+        if (!user.badges.includes('Nouveau niveau')) user.badges.push('Nouveau niveau');
+      }
+      if (user.badges.indexOf('🛒 Acheteur') === -1) user.badges.push('🛒 Acheteur');
+      await user.save();
+    }
+
     res.json({ message: 'Commande validée', orderId: order.id });
   } catch (err) {
     console.error('Erreur lors de la validation de la commande :', err);

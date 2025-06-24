@@ -82,12 +82,20 @@
     <div class="profile-card shadow-lg">
       <div class="d-flex flex-column align-items-center mb-3">
         <div class="profile-avatar">
-          <i class="bi bi-person-circle"></i>
+          <% if (user.avatar) { %>
+            <img src="<%= user.avatar %>" alt="Avatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />
+          <% } else { %>
+            <i class="bi bi-person-circle"></i>
+          <% } %>
         </div>
         <h2 class="profile-title">Gestion de Votre Profil</h2>
       </div>
-      <form id="profileForm" autocomplete="off">
+      <form id="profileForm" autocomplete="off" enctype="multipart/form-data" method="POST" action="/profile">
         <input type="hidden" name="userId" value="<%= user._id %>">
+        <div class="mb-3">
+          <label for="avatar" class="form-label"><i class="bi bi-image me-2"></i>Avatar</label>
+          <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+        </div>
         <div class="mb-3">
           <label for="name" class="form-label"><i class="bi bi-person-fill me-2"></i>Nom</label>
           <input type="text" class="form-control form-control-lg" id="name" name="name" value="<%= user.name %>" required>
