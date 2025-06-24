@@ -70,12 +70,12 @@
       <div>
         <div class="fw-bold text-primary" style="font-size:1.2rem;">🎮 Gamification</div>
         <div class="d-flex align-items-center gap-3 mt-2">
-          <span class="badge bg-success" style="font-size:1.1rem;">Points : <span id="userPoints">120</span></span>
-          <span class="badge bg-warning text-dark" style="font-size:1.1rem;">Niveau : <span id="userLevel">2</span></span>
-          <span class="badge bg-info text-dark" style="font-size:1.1rem;">Badges : <span id="userBadges">📚 Bookworm, 💬 Commentateur</span></span>
+          <span class="badge bg-success" style="font-size:1.1rem;">Points : <span id="userPoints"><%= user.points %></span></span>
+          <span class="badge bg-warning text-dark" style="font-size:1.1rem;">Niveau : <span id="userLevel"><%= user.level %></span></span>
+          <span class="badge bg-info text-dark" style="font-size:1.1rem;">Badges : <span id="userBadges"><%= Array.isArray(user.badges) ? user.badges.join(', ') : user.badges %></span></span>
         </div>
         <div class="progress mt-3" style="height:8px;max-width:300px;">
-          <div class="progress-bar bg-primary" id="levelProgress" role="progressbar" style="width:60%"></div>
+          <div class="progress-bar bg-primary" id="levelProgress" role="progressbar" style="width:<%= Math.min(100, Math.round((user.points/100)*100)) %>%;"></div>
         </div>
         <small class="text-muted">Gagnez des points en commentant, empruntant ou notant des livres !</small>
       </div>
@@ -111,11 +111,29 @@
     </div>
   </div>
   <%- include('partials/footer') %>
-  <% if (user) { %>
+<% if (user) { %>
   <script>
     window.USER_ID = "<%= user._id %>";
+    // Real-time gamification update via Socket.io
+    if (typeof io !== 'undefined' && window.USER_ID) {
+      const socket = io();
+      socket.emit('identify', window.USER_ID);
+      socket.on('gamificationUpdate', function(data) {
+        if (data) updateGamificationBar(data);
+      });
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof io !== 'undefined' && window.USER_ID) {
+          const socket = io();
+          socket.emit('identify', window.USER_ID);
+          socket.on('gamificationUpdate', function(data) {
+            if (data) updateGamificationBar(data);
+          });
+        }
+      });
+    }
   </script>
-  <% } %>
+<% } %>
   <script src="/js/client.js"></script>
   <script>
     // Helper to get the correct image URL for a book
@@ -203,6 +221,25 @@
         document.getElementById('levelProgress').style.width = percent + '%';
       }
     }
+    <% if (user) { %>
+    if (typeof io !== 'undefined' && window.USER_ID) {
+      const socket = io();
+      socket.emit('identify', window.USER_ID);
+      socket.on('gamificationUpdate', function(data) {
+        if (data) updateGamificationBar(data);
+      });
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof io !== 'undefined' && window.USER_ID) {
+          const socket = io();
+          socket.emit('identify', window.USER_ID);
+          socket.on('gamificationUpdate', function(data) {
+            if (data) updateGamificationBar(data);
+          });
+        }
+      });
+    }
+    <% } %>
 
     // Listen for comment form submission and update gamification bar
     if (document.getElementById('commentForm')) {

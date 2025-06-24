@@ -139,7 +139,7 @@
     // Real-time avatar update for all users in the table
     if (typeof io !== 'undefined') {
       const socket = io();
-      socket.on('avatarUpdate', function(data) {
+      socket.on('avatarUpdated', function(data) {
         if (data && data.userId && data.avatar) {
           // Update avatar in users table
           document.querySelectorAll(`img.admin-user-avatar[data-userid='${data.userId}']`).forEach(img => {

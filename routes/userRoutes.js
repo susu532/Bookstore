@@ -99,10 +99,20 @@ router.put('/profile', upload.single('avatar'), async (req, res) => {
     // Emit avatar update event via socket.io
     const io = req.app.get('io');
     if (io && user.avatar) {
+      // Emit to all: for admin user table, and to the user for their own navbar/profile
       io.emit('avatarUpdated', { userId: user._id.toString(), avatar: user.avatar });
     }
 
-    res.json({ message: 'Profil mis à jour avec succès', avatar: user.avatar });
+    // Emit gamification update event via socket.io (real-time, not fake)
+    if (io) {
+      io.to(user._id.toString()).emit('gamificationUpdate', {
+        points: user.points,
+        level: user.level,
+        badges: user.badges
+      });
+    }
+
+    res.json({ message: 'Profil mis à jour avec succès', avatar: user.avatar, gamification: { points: user.points, level: user.level, badges: user.badges } });
   } catch (err) {
     console.error('Erreur lors de la mise à jour du profil :', err);
     res.status(500).json({ message: 'Erreur serveur' });

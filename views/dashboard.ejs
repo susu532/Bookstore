@@ -149,10 +149,35 @@
       padding: 0.6rem 1.5rem;
       font-size: 1.1rem;
     }
+    .dashboard-card-gamification {
+      max-width: 700px;
+      min-width: 380px;
+      width: 100%;
+      padding: 3.5rem 3rem 3rem 3rem;
+      font-size: 0.8rem;
+      box-shadow: 0 6px 40px rgba(99,102,241,0.22);
+      border: 3px solid #6366f1;
+    }
+    .dashboard-card-gamification .badge {
+      font-size: 0.75rem !important;
+      padding: 0.3em 0.7em;
+    }
+    .dashboard-card-gamification .progress {
+      height: 12px !important;
+      max-width: 300px !important;
+    }
+    .dashboard-card-gamification small {
+      font-size: 0.7rem !important;
+    }
     @media (max-width: 991px) {
       .dashboard-cards {
         flex-direction: column;
         gap: 1.5rem;
+      }
+      .dashboard-card-gamification {
+        max-width: 100%;
+        min-width: 0;
+        padding: 2rem 1rem;
       }
     }
   </style>
@@ -242,13 +267,29 @@
         <p>Retrouvez toutes vos commandes et suivez leur statut en temps réel.</p>
         <a href="/orders?userId=<%= user._id %>" class="btn btn-success w-100">Historique</a>
       </div>
+      
+      <div class="dashboard-card shadow-sm dashboard-card-gamification">
+        <div class="icon bg-gradient">
+          <i class="bi bi-trophy"></i>
+        </div>
+        <h5 class="mt-3 mb-2">🎮 Gamification</h5>
+        <div class="d-flex align-items-center gap-3 justify-content-center mb-2">
+          <span class="badge bg-success" style="font-size:1.3rem;">Points : <span id="userPoints"><%= user.points %></span></span>
+          <span class="badge bg-warning text-dark" style="font-size:1.3rem;">Niveau : <span id="userLevel"><%= user.level %></span></span>
+          <span class="badge bg-info text-dark" style="font-size:1.3rem;">Badges : <span id="userBadges"><%= Array.isArray(user.badges) ? user.badges.join(', ') : user.badges %></span></span>
+        </div>
+        <div class="progress mt-2 mb-1" style="height:12px;max-width:400px;margin:auto;">
+          <div class="progress-bar bg-primary" id="levelProgress" role="progressbar" style="width:<%= Math.min(100, Math.round((user.points/100)*100)) %>%;"></div>
+        </div>
+        <small class="text-muted" style="font-size:1.1rem;">Gagnez des points en commentant, empruntant ou notant des livres !</small>
+      </div>
     </div>
   </div>
+  <% } %>
   
   <div class="container mt-5">
     <%- include('partials/footer') %>
   </div>
-  <% } %>
   <% if (user) { %>
   <script>
     window.USER_ID = "<%= user._id %>";
@@ -264,6 +305,24 @@
         if (percent > 100) percent = 100;
         document.getElementById('levelProgress').style.width = percent + '%';
       }
+    }
+    // Real-time gamification update via Socket.io
+    if (typeof io !== 'undefined' && window.USER_ID) {
+      const socket = io();
+      socket.emit('identify', window.USER_ID);
+      socket.on('gamificationUpdate', function(data) {
+        if (data) updateGamificationCard(data);
+      });
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof io !== 'undefined' && window.USER_ID) {
+          const socket = io();
+          socket.emit('identify', window.USER_ID);
+          socket.on('gamificationUpdate', function(data) {
+            if (data) updateGamificationCard(data);
+          });
+        }
+      });
     }
   </script>
   <% } %>
