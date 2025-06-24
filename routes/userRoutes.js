@@ -47,6 +47,9 @@ router.post('/login', [
       console.log('Utilisateur non trouvé pour email :', email);
       return res.status(400).json({ message: 'Identifiants incorrects' });
     }
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Vous êtes banni.' });
+    }
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       console.log('Mot de passe incorrect pour :', email);

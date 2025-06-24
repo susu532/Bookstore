@@ -30,4 +30,35 @@ router.patch('/books/:bookId/stock', async (req, res) => {
   }
 });
 
+// Toggle user active status (PUT /admin/users/toggle/:userId)
+router.put('/users/toggle/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { isActive } = req.body;
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ message: 'isActive must be boolean' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    user.isActive = isActive;
+    await user.save();
+    res.json({ isActive: user.isActive });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Delete user
+router.delete('/users/:userId', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.userId);
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    res.json({ message: 'Utilisateur supprimé' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

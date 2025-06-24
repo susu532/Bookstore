@@ -1,4 +1,3 @@
-<%- include('../partials/navbar', { user }) %>
 <style>
   body {
     background: #f6f8fa;
@@ -90,122 +89,173 @@
     margin-bottom: 1.5rem;
     letter-spacing: 0.01em;
   }
+  .sidebar {
+    min-height: 100vh;
+    background: linear-gradient(180deg,#6366f1 0%,#06b6d4 100%);
+    color: #fff;
+    padding: 2rem 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    z-index: 100;
+    box-shadow: 2px 0 16px rgba(99,102,241,0.10);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .sidebar-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .nav-link {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.75rem;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
 </style>
 <div class="container">
-  <h1 class="modern-title">Gestion des Emprunts</h1>
-  <div id="emprunt-stats" class="mb-4"></div>
-  <div id="overdue-alerts" class="mb-4"></div>
-  <div class="modern-card">
-    <table class="table modern-table align-middle">
-      <thead>
-        <tr>
-          <th>Utilisateur</th>
-          <th>Livre</th>
-          <th>Date d'emprunt</th>
-          <th>Date de retour</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% emprunts.forEach(e => { %>
-          <tr>
-            <td>
-              <span class="badge-modern badge-info">
-                <i class="bi bi-person-circle"></i>
-                <%= e.user.name %>
-              </span>
-              <br>
-              <small style="color:#6c757d;"><%= e.user.email %></small>
-            </td>
-            <td>
-              <span class="badge-modern badge-info">
-                <i class="bi bi-book"></i>
-                <%= e.book.title %>
-              </span>
-            </td>
-            <td>
-              <span class="badge-modern badge-info">
-                <i class="bi bi-calendar-event"></i>
-                <%= e.dateEmprunt.toLocaleDateString() %>
-              </span>
-            </td>
-            <td>
-              <% if (e.dateRetour) { %>
-                <span class="badge-modern badge-success">
-                  <i class="bi bi-check-circle"></i> <%= e.dateRetour.toLocaleDateString() %>
-                </span>
-              <% } else { %>
-                <span class="badge-modern badge-warning">
-                  <i class="bi bi-clock-history"></i> Non retourné
-                </span>
-              <% } %>
-            </td>
-            <td>
-              <% if (!e.dateRetour) { %>
-                <button class="btn btn-modern btn-sm"
-                        onclick="retournerLivre('<%= e._id %>')">
-                  <i class="bi bi-arrow-return-left"></i> Retourner
-                </button>
-              <% } else { %>
-                <span class="badge-modern badge-returned">
-                  <i class="bi bi-check2-all"></i> Retourné
-                </span>
-              <% } %>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  // Stats
-  const statsRes = await fetch('/api/emprunts/stats');
-  if (statsRes.ok) {
-    const stats = await statsRes.json();
-    document.getElementById('emprunt-stats').innerHTML = `
-      <div class="modern-card" style="display:flex;flex-wrap:wrap;gap:2rem;align-items:center;justify-content:space-between;">
-        <div>
-          <span class="badge-modern badge-info"><b>Total emprunts :</b> ${stats.total}</span>
-          <span class="badge-modern badge-warning"><b>En cours :</b> ${stats.actifs}</span>
-          <span class="badge-modern badge-success"><b>Retournés :</b> ${stats.returned}</span>
-        </div>
-        <div>
-          <span class="badge-modern badge-info"><b>Top livres :</b> ${stats.topBooks.map(b => `${b.title} (${b.count})`).join(', ')}</span>
-        </div>
+  <% if (user && user.role === 1) { %>
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/images/logo.png" alt="Logo" style="height:40px;vertical-align:middle;"> <span>Admin</span>
       </div>
-    `;
-  }
-  // Overdue
-  const overdueRes = await fetch('/api/emprunts/overdue');
-  if (overdueRes.ok) {
-    const data = await overdueRes.json();
-    if (data.emprunts.length > 0) {
-      document.getElementById('overdue-alerts').innerHTML = `
-        <div class="overdue-card">
-          <b>Emprunts en retard :</b>
-          <ul style="margin:0.5em 0 0 1.2em;">
-            ${data.emprunts.map(e => `<li><b>${e.user.name}</b> - <i>${e.book.title}</i> <span style="color:#a94442;">(depuis le ${new Date(e.dateEmprunt).toLocaleDateString()})</span></li>`).join('')}
-          </ul>
+      <a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2"></i> Tableau de bord</a>
+      <a href="/books/manage" class="nav-link"><i class="bi bi-journal-text"></i> Gérer les livres</a>
+      <a href="/admin/users" class="nav-link"><i class="bi bi-people"></i> Gérer les utilisateurs</a>
+      <a href="/admin/orders" class="nav-link"><i class="bi bi-bag-check"></i> Gérer les commandes</a>
+      <a href="/admin/emprunts" class="nav-link"><i class="bi bi-clock-history"></i> Gérer les emprunts</a>
+      <a href="/admin/stock" class="nav-link"><i class="bi bi-box-seam"></i> Stock</a>
+     
+      <a href="/logout" class="nav-link"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+    </nav>
+    <div style="margin-left:260px;">
+  <% } else { %>
+    <div>
+  <% } %>
+      <h1 class="modern-title">Gestion des Emprunts</h1>
+      <div id="emprunt-stats" class="mb-4"></div>
+      <div id="overdue-alerts" class="mb-4"></div>
+      <div class="modern-card">
+        <table class="table modern-table align-middle">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Livre</th>
+              <th>Date d'emprunt</th>
+              <th>Date de retour</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% emprunts.forEach(e => { %>
+              <tr>
+                <td>
+                  <span class="badge-modern badge-info">
+                    <i class="bi bi-person-circle"></i>
+                    <%= e.user.name %>
+                  </span>
+                  <br>
+                  <small style="color:#6c757d;"><%= e.user.email %></small>
+                </td>
+                <td>
+                  <span class="badge-modern badge-info">
+                    <i class="bi bi-book"></i>
+                    <%= e.book.title %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge-modern badge-info">
+                    <i class="bi bi-calendar-event"></i>
+                    <%= e.dateEmprunt.toLocaleDateString() %>
+                  </span>
+                </td>
+                <td>
+                  <% if (e.dateRetour) { %>
+                    <span class="badge-modern badge-success">
+                      <i class="bi bi-check-circle"></i> <%= e.dateRetour.toLocaleDateString() %>
+                    </span>
+                  <% } else { %>
+                    <span class="badge-modern badge-warning">
+                      <i class="bi bi-clock-history"></i> Non retourné
+                    </span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (!e.dateRetour) { %>
+                    <button class="btn btn-modern btn-sm"
+                            onclick="retournerLivre('<%= e._id %>')">
+                      <i class="bi bi-arrow-return-left"></i> Retourner
+                    </button>
+                  <% } else { %>
+                    <span class="badge-modern badge-returned">
+                      <i class="bi bi-check2-all"></i> Retourné
+                    </span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div> <!-- end main-content or container -->
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Stats
+    const statsRes = await fetch('/api/emprunts/stats');
+    if (statsRes.ok) {
+      const stats = await statsRes.json();
+      document.getElementById('emprunt-stats').innerHTML = `
+        <div class="modern-card" style="display:flex;flex-wrap:wrap;gap:2rem;align-items:center;justify-content:space-between;">
+          <div>
+            <span class="badge-modern badge-info"><b>Total emprunts :</b> ${stats.total}</span>
+            <span class="badge-modern badge-warning"><b>En cours :</b> ${stats.actifs}</span>
+            <span class="badge-modern badge-success"><b>Retournés :</b> ${stats.returned}</span>
+          </div>
+          <div>
+            <span class="badge-modern badge-info"><b>Top livres :</b> ${stats.topBooks.map(b => `${b.title} (${b.count})`).join(', ')}</span>
+          </div>
         </div>
       `;
     }
-  }
-});
-
-// Permet à l'admin de retourner un livre pour un utilisateur
-async function retournerLivre(empruntId) {
-  const res = await fetch(`/api/emprunts/return/${empruntId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
+    // Overdue
+    const overdueRes = await fetch('/api/emprunts/overdue');
+    if (overdueRes.ok) {
+      const data = await overdueRes.json();
+      if (data.emprunts.length > 0) {
+        document.getElementById('overdue-alerts').innerHTML = `
+          <div class="overdue-card">
+            <b>Emprunts en retard :</b>
+            <ul style="margin:0.5em 0 0 1.2em;">
+              ${data.emprunts.map(e => `<li><b>${e.user.name}</b> - <i>${e.book.title}</i> <span style="color:#a94442;">(depuis le ${new Date(e.dateEmprunt).toLocaleDateString()})</span></li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+    }
   });
-  const data = await res.json();
-  if (res.ok) {
-    alert('Livre retourné avec succès');
-    window.location.reload();
-  } else {
-    alert(data.message || 'Erreur lors du retour');
+
+  // Permet à l'admin de retourner un livre pour un utilisateur
+  async function retournerLivre(empruntId) {
+    const res = await fetch(`/api/emprunts/return/${empruntId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert('Livre retourné avec succès');
+      window.location.reload();
+    } else {
+      alert(data.message || 'Erreur lors du retour');
+    }
   }
-}
-</script>
+  </script>
