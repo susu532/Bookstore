@@ -112,6 +112,7 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
   <script src="/js/client.js"></script>
+  <script src="/js/avatar-socket.js"></script>
   <script>
     // Rendu dynamique des utilisateurs
     function renderUsers(users) {
@@ -131,6 +132,19 @@
               <td><button class="btn btn-sm btn-danger shadow" onclick='deleteUser("${user._id}")'>Supprimer</button></td>
             </tr>
           `;
+        }
+      });
+    }
+
+    // Real-time avatar update for all users in the table
+    if (typeof io !== 'undefined') {
+      const socket = io();
+      socket.on('avatarUpdate', function(data) {
+        if (data && data.userId && data.avatar) {
+          // Update avatar in users table
+          document.querySelectorAll(`img.admin-user-avatar[data-userid='${data.userId}']`).forEach(img => {
+            img.src = data.avatar + '?t=' + Date.now();
+          });
         }
       });
     }

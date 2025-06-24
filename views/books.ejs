@@ -111,6 +111,11 @@
     </div>
   </div>
   <%- include('partials/footer') %>
+  <% if (user) { %>
+  <script>
+    window.USER_ID = "<%= user._id %>";
+  </script>
+  <% } %>
   <script src="/js/client.js"></script>
   <script>
     // Helper to get the correct image URL for a book

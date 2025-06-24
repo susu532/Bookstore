@@ -63,3 +63,38 @@
   </div>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.USER_ID = "<%= user ? user._id : '' %>";
+    // Real-time avatar update
+    (function avatarRealtimeInit() {
+      function updateAvatar(avatarUrl) {
+        // Update all avatar images in navbar
+        document.querySelectorAll('.navbar-avatar-img').forEach(img => {
+          if (img.tagName === 'IMG') {
+            img.src = avatarUrl + '?t=' + Date.now();
+          }
+        });
+        // Update profile avatar if present
+        const profileAvatar = document.querySelector('.profile-avatar img');
+        if (profileAvatar) profileAvatar.src = avatarUrl + '?t=' + Date.now();
+      }
+      if (typeof window.io !== 'undefined' && window.USER_ID) {
+        const socket = io();
+        socket.emit('identify', window.USER_ID);
+        socket.on('avatarUpdate', function(data) {
+          if (data && data.avatar) updateAvatar(data.avatar);
+        });
+      } else {
+        // Wait for client.js to load Socket.io
+        document.addEventListener('DOMContentLoaded', function() {
+          if (window.io && window.USER_ID) {
+            const socket = io();
+            socket.emit('identify', window.USER_ID);
+            socket.on('avatarUpdate', function(data) {
+              if (data && data.avatar) updateAvatar(data.avatar);
+            });
+          }
+        });
+      }
+    })();
+  </script>
