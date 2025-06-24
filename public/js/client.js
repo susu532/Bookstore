@@ -351,3 +351,33 @@ async function redirectToDashboard(userId) {
     showNotification('Erreur lors de la vérification du rôle', 'error');
   }
 }
+
+// --- Universal Socket.io gamification real-time update ---
+(function gamificationRealtimeInit() {
+  // Only run if user is present (userId injected by EJS)
+  if (typeof window.USER_ID === 'undefined' || !window.USER_ID) return;
+  // Load Socket.io client if not present
+  function loadSocketIo(cb) {
+    if (window.io) return cb();
+    var script = document.createElement('script');
+    script.src = '/socket.io/socket.io.js';
+    script.onload = cb;
+    document.head.appendChild(script);
+  }
+  loadSocketIo(function() {
+    const socket = io();
+    socket.emit('identify', window.USER_ID);
+    socket.on('gamificationUpdate', function(data) {
+      if (typeof updateGamificationBar === 'function') {
+        updateGamificationBar(data);
+      }
+      // Optionally, update dashboard card or show notification
+      if (typeof updateGamificationCard === 'function') {
+        updateGamificationCard(data);
+      }
+      if (data && data.points !== undefined) {
+        showNotification('Vos points et récompenses ont été mis à jour !', 'success', 4000);
+      }
+    });
+  });
+})();

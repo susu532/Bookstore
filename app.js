@@ -168,5 +168,37 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 app.set('io', io); // Make io accessible in routes
 
+// --- Gamification Real-Time: Track user connections ---
+const userSocketMap = new Map(); // userId -> Set of socketIds
+
+io.on('connection', (socket) => {
+  // Listen for user identification from client
+  socket.on('identify', (userId) => {
+    if (!userId) return;
+    if (!userSocketMap.has(userId)) userSocketMap.set(userId, new Set());
+    userSocketMap.get(userId).add(socket.id);
+    socket.userId = userId;
+  });
+
+  socket.on('disconnect', () => {
+    if (socket.userId && userSocketMap.has(socket.userId)) {
+      userSocketMap.get(socket.userId).delete(socket.id);
+      if (userSocketMap.get(socket.userId).size === 0) {
+        userSocketMap.delete(socket.userId);
+      }
+    }
+  });
+});
+
+// Helper to emit gamification updates to a user
+app.emitGamificationUpdate = (userId, gamificationData) => {
+  const sockets = userSocketMap.get(String(userId));
+  if (sockets) {
+    for (const socketId of sockets) {
+      io.to(socketId).emit('gamificationUpdate', gamificationData);
+    }
+  }
+};
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));
