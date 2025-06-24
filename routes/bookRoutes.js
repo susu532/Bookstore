@@ -34,15 +34,18 @@ router.post('/add', upload.single('image'), async (req, res) => {
       image: imagePath
     });
     await book.save();
-    res.json({ message: 'Livre ajouté avec succès', bookId: book.id });
+    // Always return the full book object for real-time UI
+    const bookObj = book.toObject();
+    if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+    res.json({ message: 'Livre ajouté avec succès', bookId: book.id, book: bookObj });
   } catch (err) {
     console.error('Erreur lors de l’ajout du livre :', err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
-// Mettre à jour un livre
-router.put('/:bookId', async (req, res) => {
+// Mettre à jour un livre (avec support upload image)
+router.put('/:bookId', upload.single('image'), async (req, res) => {
   const { title, author, genre, price, description, stock } = req.body;
   try {
     const book = await Book.findById(req.params.bookId);
@@ -54,8 +57,14 @@ router.put('/:bookId', async (req, res) => {
     if (price) book.price = price;
     if (description) book.description = description;
     if (stock !== undefined) book.stock = stock;
+    if (req.file) {
+      book.image = '/images/books/' + req.file.filename;
+    }
     await book.save();
-    res.json({ message: 'Livre mis à jour avec succès' });
+    // Always return the full book object for real-time UI
+    const bookObj = book.toObject();
+    if (!bookObj.image) bookObj.image = '/images/books/default-cover.png';
+    res.json({ message: 'Livre mis à jour avec succès', book: bookObj });
   } catch (err) {
     console.error('Erreur lors de la mise à jour du livre :', err);
     res.status(500).json({ message: 'Erreur serveur' });
@@ -79,12 +88,17 @@ router.delete('/:bookId', async (req, res) => {
 router.get('/search', async (req, res) => {
   const { query } = req.query;
   try {
-    const books = await Book.find({
+    let books = await Book.find({
       $or: [
         { title: { $regex: query, $options: 'i' } },
         { author: { $regex: query, $options: 'i' } },
         { genre: { $regex: query, $options: 'i' } }
       ]
+    });
+    books = books.map(book => {
+      book = book.toObject();
+      if (!book.image) book.image = '/images/books/default-cover.png';
+      return book;
     });
     res.json(books);
   } catch (err) {
@@ -96,7 +110,12 @@ router.get('/search', async (req, res) => {
 // Récupérer tous les livres
 router.get('/', async (req, res) => {
   try {
-    const books = await Book.find();
+    let books = await Book.find();
+    books = books.map(book => {
+      book = book.toObject();
+      if (!book.image) book.image = '/images/books/default-cover.png';
+      return book;
+    });
     res.json(books);
   } catch (err) {
     console.error('Erreur lors de la récupération des livres :', err);

@@ -118,23 +118,25 @@ document.getElementById('addBookForm')?.addEventListener('submit', async (e) => 
     showNotification(data.message, 'success');
     // Real-time update: add the new book to the table without reload
     const booksTableBody = document.getElementById('booksTableBody');
-    if (booksTableBody && data.bookId) {
+    if (booksTableBody && data.book) {
+      const book = data.book;
       const row = document.createElement('tr');
-      row.setAttribute('data-book-id', data.bookId);
+      row.setAttribute('data-book-id', book._id);
       row.innerHTML = `
-        <td>${title}</td>
-        <td>${author}</td>
-        <td><span class="badge bg-info bg-gradient text-dark">${genre}</span></td>
-        <td><span class="fw-bold text-success">${price}</span></td>
-        <td><span class="badge bg-success">${stock}</span></td>
+        <td>${book.title}</td>
+        <td>${book.author}</td>
+        <td><span class="badge bg-info bg-gradient text-dark">${book.genre}</span></td>
+        <td><span class="fw-bold text-success">${book.price}</span></td>
+        <td>${book.stock > 5 ? `<span class='badge bg-success'>${book.stock}</span>` : book.stock > 0 ? `<span class='badge bg-warning text-dark'>${book.stock}</span>` : `<span class='badge bg-danger'>Rupture</span>`}</td>
+        <td>${book.image ? `<img src='${book.image}' alt='Couverture' style='width:48px;height:64px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;'>` : `<span class='text-muted'>Aucune</span>`}</td>
         <td>
-          <button onclick="editBook('${data.bookId}', '${title.replace(/'/g, "&#39;")}', '${author.replace(/'/g, "&#39;")}', '${genre}', '${price}', '${stock}')" class="btn btn-sm btn-primary me-1" title="Modifier">
+          <button onclick="editBook('${book._id}', '${book.title.replace(/'/g, "&#39;")}', '${book.author.replace(/'/g, "&#39;")}', '${book.genre}', '${book.price}', '${book.stock}')" class="btn btn-sm btn-primary me-1" title="Modifier">
             <i class="bi bi-pencil-square"></i>
           </button>
-          <button onclick="deleteBook('${data.bookId}')" class="btn btn-sm btn-danger me-1" title="Supprimer">
+          <button onclick="deleteBook('${book._id}')" class="btn btn-sm btn-danger me-1" title="Supprimer">
             <i class="bi bi-trash"></i>
           </button>
-          <a href="/book/${data.bookId}" class="btn btn-sm btn-info" title="Détails">
+          <a href="/book/${book._id}" class="btn btn-sm btn-info" title="Détails">
             <i class="bi bi-info-circle"></i>
           </a>
         </td>
@@ -204,13 +206,20 @@ document.getElementById('searchBooksForm')?.addEventListener('submit', async (e)
       <tr data-book-id="${book._id}">
         <td>${book.title}</td>
         <td>${book.author}</td>
-        <td>${book.genre}</td>
-        <td>${book.price}</td>
-        <td>${book.stock}</td>
+        <td><span class="badge bg-info bg-gradient text-dark">${book.genre}</span></td>
+        <td><span class="fw-bold text-success">${book.price}</span></td>
+        <td>${book.stock > 5 ? `<span class='badge bg-success'>${book.stock}</span>` : book.stock > 0 ? `<span class='badge bg-warning text-dark'>${book.stock}</span>` : `<span class='badge bg-danger'>Rupture</span>`}</td>
+        <td>${book.image ? `<img src='${book.image}' alt='Couverture' style='width:48px;height:64px;object-fit:cover;border-radius:0.3rem;box-shadow:0 2px 8px #0001;'>` : `<span class='text-muted'>Aucune</span>`}</td>
         <td>
-          <button onclick="editBook('${book._id}')" class="btn btn-sm btn-primary">Modifier</button>
-          <button onclick="deleteBook('${book._id}')" class="btn btn-sm btn-danger">Supprimer</button>
-          <a href="/book/${book._id}" class="btn btn-sm btn-info">Détails</a>
+          <button onclick="editBook('${book._id}', '${book.title.replace(/'/g, "&#39;")}', '${book.author.replace(/'/g, "&#39;")}', '${book.genre}', '${book.price}', '${book.stock}')" class="btn btn-sm btn-primary me-1" title="Modifier">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button onclick="deleteBook('${book._id}')" class="btn btn-sm btn-danger me-1" title="Supprimer">
+            <i class="bi bi-trash"></i>
+          </button>
+          <a href="/book/${book._id}" class="btn btn-sm btn-info" title="Détails">
+            <i class="bi bi-info-circle"></i>
+          </a>
         </td>
       </tr>
     `;

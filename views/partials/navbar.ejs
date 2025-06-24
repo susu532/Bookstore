@@ -62,7 +62,7 @@
     html += createNavItem('/orders', 'Commandes');
     html += createNavItem('/profile', 'Profil');
     
-    html += createNavItem('/orders/manage', 'Gestion des Commandes');
+    html += createNavItem('/orders/manage', 'historique des Commandes');
     <% if (user && user.role === 1) { %>
     html += createNavItem('/books/manage', 'Gestion des Livres');
     html += createNavItem('/admin/emprunts', 'Gestion des Emprunts');

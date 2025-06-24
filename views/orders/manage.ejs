@@ -64,73 +64,7 @@
   <%- include('../partials/navbar', { user }) %>
   <div class="container py-5">
     <div class="row g-4">
-      <!-- Ajout au panier -->
-      <div class="col-lg-5">
-        <div class="card shadow-sm p-4 h-100">
-          <h3 class="mb-4 text-primary"><i class="bi bi-cart-plus"></i> Ajouter des Livres au Panier</h3>
-          <form id="addToCartForm" class="mb-3" autocomplete="off">
-            <div class="mb-3">
-              <label for="bookId" class="form-label">Sélectionner un livre</label>
-              <select class="form-select" id="bookId" name="bookId" required>
-                <option value="">Choisir un livre</option>
-                <% books.forEach(book => { %>
-                  <option value="<%= book._id %>">
-                    <%= book.title %> - <%= book.author %> 
-                    (<span class="badge bg-info text-dark">Stock: <%= book.stock %></span>)
-                  </option>
-                <% }) %>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="quantity" class="form-label">Quantité</label>
-              <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100" id="addToCartBtn">
-              <i class="bi bi-plus-circle"></i> Ajouter au Panier
-            </button>
-          </form>
-        </div>
-      </div>
-      <!-- Panier actuel -->
-      <div class="col-lg-7">
-        <div class="card shadow-sm p-4 h-100">
-          <h3 class="mb-4 text-success"><i class="bi bi-basket"></i> Panier Actuel</h3>
-          <div class="table-responsive">
-            <table class="table cart-table align-middle mb-3">
-              <thead>
-                <tr>
-                  <th>Titre</th>
-                  <th>Auteur</th>
-                  <th>Quantité</th>
-                  <th>Prix Unitaire (€)</th>
-                  <th>Total (€)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% if(cart.books.length === 0) { %>
-                  <tr>
-                    <td colspan="5" class="text-center text-secondary">Votre panier est vide.</td>
-                  </tr>
-                <% } else { %>
-                  <% cart.books.forEach(item => { %>
-                    <tr>
-                      <td><span class="fw-semibold"><%= item.book.title %></span></td>
-                      <td><span class="text-info"><%= item.book.author %></span></td>
-                      <td><span class="badge bg-primary"><%= item.quantity %></span></td>
-                      <td><span class="badge bg-warning text-dark"><%= item.book.price %></span></td>
-                      <td><span class="order-total"><%= (item.book.price * item.quantity).toFixed(2) %></span></td>
-                    </tr>
-                  <% }) %>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-          <button onclick="checkout()" class="btn btn-success w-100" <%= cart.books.length === 0 ? 'disabled' : '' %>>
-            <i class="bi bi-bag-check"></i> Valider la Commande
-          </button>
-        </div>
-      </div>
-    </div>
+   
     <!-- Historique des commandes -->
     <div class="row mt-5">
       <div class="col-12">
@@ -176,7 +110,7 @@
     </div>
   </div>
   <div class="container mt-5">
-    <%- include('partials/footer') %>
+    <%- include('../partials/footer') %>
   </div>
   <script src="/js/client.js"></script>
   <script>

@@ -35,6 +35,8 @@ passport.deserializeUser(async (id, done) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve book images from /public/images/books at /images/books
+app.use('/images/books', express.static(path.join(__dirname, 'public/images/books')));
 
 // Configuration EJS
 app.set('view engine', 'ejs');

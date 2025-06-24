@@ -73,9 +73,21 @@
       <p class="mb-0 fs-5">Découvrez notre collection variée et trouvez votre prochain coup de cœur.</p>
     </div>
     <form class="mb-4" id="searchBooksForm" autocomplete="off">
-      <div class="input-group search-bar">
-        <input type="text" class="form-control border-0 shadow-none" id="searchQuery" placeholder="Rechercher par titre, auteur ou genre...">
+      <div class="input-group search-bar mb-2">
+        <input type="text" class="form-control border-0 shadow-none" id="searchQuery" placeholder="Rechercher par titre...">
         <button type="submit" class="btn btn-primary px-4">Rechercher</button>
+      </div>
+      <div class="row g-2 mb-2">
+        <div class="col-md-6">
+          <select class="form-select" id="authorFilter">
+            <option value="">Tous les auteurs</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" id="genreFilter">
+            <option value="">Tous les genres</option>
+          </select>
+        </div>
       </div>
     </form>
     <div class="row g-4" id="booksContainer">
@@ -85,15 +97,27 @@
   <%- include('partials/footer') %>
   <script src="/js/client.js"></script>
   <script>
+    // Helper to get the correct image URL for a book
+    function getBookImageUrl(image) {
+      if (!image || image.trim() === '') {
+        return '/images/books/default-cover.png';
+      }
+      if (image.startsWith('/') || image.startsWith('http')) {
+        return image;
+      }
+      return '/images/books/' + image;
+    }
+
     // Fonction pour afficher les livres
     function renderBooks(books) {
       const container = document.getElementById('booksContainer');
       container.innerHTML = '';
       books.forEach(book => {
+        const imageUrl = getBookImageUrl(book.image);
         container.innerHTML += `
           <div class="col-12 col-sm-6 col-md-4">
             <div class="card h-100">
-              ${book.image ? `<img src="${book.image}" alt="Couverture" class="card-img-top" style="height:220px;object-fit:cover;border-radius:1rem 1rem 0 0;">` : ''}
+              <img src="${imageUrl}" alt="Couverture" class="card-img-top" style="height:220px;object-fit:cover;border-radius:1rem 1rem 0 0;">
               <div class="card-body d-flex flex-column">
                 <h5 class="card-title">${book.title}</h5>
                 <p class="card-text mb-1"><span class="fw-semibold">Auteur :</span> ${book.author}</p>
@@ -107,19 +131,41 @@
       });
     }
 
-    // Charger tous les livres au chargement de la page
+    // Helper to get unique values from books
+    function getUniqueValues(books, key) {
+      return [...new Set(books.map(book => book[key]).filter(Boolean))];
+    }
+
+    // Populate author and genre filters
+    function populateFilters(books) {
+      const authorSelect = document.getElementById('authorFilter');
+      const genreSelect = document.getElementById('genreFilter');
+      const authors = getUniqueValues(books, 'author');
+      const genres = getUniqueValues(books, 'genre');
+      authorSelect.innerHTML = '<option value="">Tous les auteurs</option>' + authors.map(a => `<option value="${a}">${a}</option>`).join('');
+      genreSelect.innerHTML = '<option value="">Tous les genres</option>' + genres.map(g => `<option value="${g}">${g}</option>`).join('');
+    }
+
+    // Charger tous les livres au chargement de la page et remplir les filtres
     async function loadAllBooks() {
       const res = await fetch('/api/books');
       const books = await res.json();
       renderBooks(books);
+      populateFilters(books);
     }
     document.addEventListener('DOMContentLoaded', loadAllBooks);
 
-    // Recherche dynamique
+    // Recherche dynamique avec filtres
     document.getElementById('searchBooksForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const query = document.getElementById('searchQuery').value;
-      const res = await fetch(`/api/books/search?query=${encodeURIComponent(query)}`);
+      const author = document.getElementById('authorFilter').value;
+      const genre = document.getElementById('genreFilter').value;
+      const params = new URLSearchParams();
+      if (query) params.append('query', query);
+      if (author) params.append('author', author);
+      if (genre) params.append('genre', genre);
+      const res = await fetch(`/api/books/search?${params.toString()}`);
       const books = await res.json();
       renderBooks(books);
     });
