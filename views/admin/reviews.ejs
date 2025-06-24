@@ -79,8 +79,7 @@
               <span class="ms-2 text-warning">${r.rating ? '★'.repeat(r.rating) : ''}</span>
             </div>
             <div class="review-actions">
-              <button class="btn btn-success btn-sm" onclick="moderateReview('${r._id}','approve')"><i class="bi bi-check-circle"></i> Approuver</button>
-              <button class="btn btn-warning btn-sm" onclick="moderateReview('${r._id}','reject')"><i class="bi bi-x-circle"></i> Rejeter</button>
+              
               <button class="btn btn-danger btn-sm" onclick="moderateReview('${r._id}','delete')"><i class="bi bi-trash"></i> Supprimer</button>
             </div>
           </div>
@@ -93,6 +92,17 @@
         socket.on('reviewUpdate', function() {
           loadReviews();
         });
+      } else {
+        // Dynamically load Socket.io client if not present
+        const script = document.createElement('script');
+        script.src = '/socket.io/socket.io.js';
+        script.onload = function() {
+          const socket = io();
+          socket.on('reviewUpdate', function() {
+            loadReviews();
+          });
+        };
+        document.body.appendChild(script);
       }
       // Actions de modération (scaffold, à compléter côté backend)
       async function moderateReview(id, action) {
