@@ -1,0 +1,17 @@
+.footer-gradient {
+  background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%);
+  color: #fff;
+}
+.footer-link {
+  color: #ffd700 !important;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: #fff !important;
+  text-decoration: underline;
+}
+.footer-divider {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  margin: 1.5rem 0;
+}

@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const passport = require('passport');
 const User = require('./models/User');
+const Book = require('./models/Book'); // Import Book model
 
 dotenv.config();
 const app = express();
@@ -195,6 +196,19 @@ io.on('connection', (socket) => {
     if (!userSocketMap.has(userId)) userSocketMap.set(userId, new Set());
     userSocketMap.get(userId).add(socket.id);
     socket.userId = userId;
+  });
+
+  // Real-time: Send 5 most recent books on request
+  socket.on('getRecentBooks', async () => {
+    try {
+      const books = await Book.find({})
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
+      socket.emit('recentBooks', books);
+    } catch (err) {
+      socket.emit('recentBooks', []);
+    }
   });
 
   socket.on('disconnect', () => {

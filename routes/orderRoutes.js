@@ -3,6 +3,7 @@ const router = express.Router();
 const Cart = require('../models/Cart');
 const Order = require('../models/Order');
 const Book = require('../models/Book');
+const nodemailer = require('nodemailer');
 
 // Ajouter au panier
 router.post('/cart', async (req, res) => {
@@ -73,6 +74,33 @@ router.post('/checkout', async (req, res) => {
       }
       if (user.badges.indexOf('🛒 Acheteur') === -1) user.badges.push('🛒 Acheteur');
       await user.save();
+    }
+
+    // Send confirmation email using SMTP settings from .env
+    if (user && user.email) {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT, 10),
+        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+      const mailOptions = {
+        from: `Books Garden <${process.env.SMTP_USER}>`,
+        to: user.email,
+        subject: 'Confirmation de commande - Books Garden',
+        text: `Bonjour ${user.name},\n\nVotre commande a bien été enregistrée !\nMontant total : ${total.toFixed(2)} €\nMerci pour votre confiance.\n\nBooks Garden™`,
+        html: `<p>Bonjour <b>${user.name}</b>,</p><p>Votre commande a bien été enregistrée !</p><p><b>Montant total :</b> ${total.toFixed(2)} €</p><p>Merci pour votre confiance.<br/>Books Garden™</p>`
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Erreur lors de l\'envoi de l\'email :', error, user.email);
+        } else {
+          console.log('Email envoyé :', info.response, user.email);
+        }
+      });
     }
 
     res.json({ message: 'Commande validée', orderId: order.id });

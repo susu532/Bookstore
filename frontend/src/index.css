@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+  min-height: 100vh;
+  margin: 0;
+  color: #232946;
+}
+
+html, #root {
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+a {
+  font-weight: 600;
+  color: #6366f1;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover {
+  color: #06b6d4;
+  text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: #232946;
+  letter-spacing: -0.5px;
+}
+
+button, .btn {
+  border-radius: 1.25rem;
+  border: none;
+  padding: 0.85em 2.2em;
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: inherit;
+  background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.10);
+}
+button:hover, .btn:hover {
+  background: linear-gradient(90deg, #06b6d4 0%, #6366f1 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(99,102,241,0.18);
+}
+button:focus, .btn:focus {
+  outline: 2px solid #6366f1;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 1em;
+  border-radius: 1rem;
+  border: 1.5px solid #e0e7ff;
+  padding: 0.8em 1.1em;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.04);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #6366f1;
+  outline: none;
+  box-shadow: 0 0 0 2px #6366f1;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  background: #ede9fe;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #a5b4fc 0%, #67e8f9 100%);
+  border-radius: 8px;
+}
+
+.card, .feature-card, .login-card, .register-card, .profile-card {
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
+  background: rgba(255,255,255,0.97);
+  padding: 2.5rem 2rem;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.card:hover, .feature-card:hover, .login-card:hover, .register-card:hover, .profile-card:hover {
+  box-shadow: 0 16px 48px 0 rgba(31, 38, 135, 0.18);
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .card, .feature-card, .login-card, .register-card, .profile-card {
+    padding: 1.2rem 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+}

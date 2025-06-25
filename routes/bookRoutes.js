@@ -298,4 +298,14 @@ router.delete('/comment/:commentId', async (req, res) => {
   }
 });
 
+// Get 5 most recently added books
+router.get('/recent', async (req, res) => {
+  try {
+    const books = await Book.find().sort({ createdAt: -1 }).limit(5);
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;
