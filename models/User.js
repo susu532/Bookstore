@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
   points: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
   badges: [{ type: String }],
-  avatar: { type: String } // Path to avatar image
+  avatar: { type: String }, // Path to avatar image
+  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] // <-- Added wishlist field
 });
 
 userSchema.pre('save', async function(next) {

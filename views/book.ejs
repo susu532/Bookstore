@@ -123,12 +123,20 @@
               </div>
               <form id="addToCartForm" class="needs-validation" novalidate>
                 <input type="hidden" name="bookId" value="<%= book._id %>">
-                <div class="mb-3">
+                <div class="mb-3 d-flex align-items-center gap-2">
                   <label for="quantity" class="form-label">Quantité</label>
                   <input type="number" class="form-control form-control-lg" id="quantity" min="1" max="<%= book.stock %>" value="1" required style="max-width:120px;">
                   <div class="invalid-feedback">
                     Veuillez entrer une quantité valide.
                   </div>
+                  <% if (user) { %>
+                    <button type="button" id="wishlistBtn" class="btn btn-outline-danger btn-lg ms-2 d-flex align-items-center" style="height:48px;">
+                      <i class="bi <%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'bi-heart-fill text-danger' : 'bi-heart' %>" style="font-size:1.5rem;"></i>
+                      <span id="wishlistBtnText" class="ms-2">
+                        <%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'Retirer des favoris' : 'Ajouter aux favoris' %>
+                      </span>
+                    </button>
+                  <% } %>
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg w-100" <%= book.stock === 0 ? 'disabled' : '' %>>
                   <i class="bi bi-cart-plus"></i> Ajouter au panier
@@ -227,6 +235,12 @@
     let selectedRating = 0;
     let like = false;
     let dislike = false;
+    // Wishlist state for JS
+    <% if (user) { %>
+    var inWishlist = <%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'true' : 'false' %>;
+    <% } else { %>
+    var inWishlist = false;
+    <% } %>
 
     function renderComments(comments) {
       const list = document.getElementById('commentsList');
@@ -426,8 +440,7 @@
       const wishlistBtn = document.getElementById('wishlistBtn');
       const wishlistBtnText = document.getElementById('wishlistBtnText');
       let moveToCartBtn = document.getElementById('moveToCartBtn');
-      let inWishlist = <%= user.wishlist && user.wishlist.includes(book._id.toString()) ? 'true' : 'false' %>;
-      inWishlist = (inWishlist === 'true');
+      inWishlist = (inWishlist === true || inWishlist === 'true');
       const wishlistCount = document.getElementById('wishlistCount');
       document.addEventListener('DOMContentLoaded', function() {
         let socket;

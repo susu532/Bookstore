@@ -41,8 +41,12 @@
                   <h5 class="mb-1"><%= book.title %></h5>
                   <p class="mb-1 text-muted"><%= book.author %></p>
                   <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-primary btn-sm move-to-cart-btn"><i class="bi bi-cart-plus"></i> Déplacer vers le panier</button>
-                    <button class="btn btn-outline-danger btn-sm toggle-wishlist-btn"><i class="bi bi-heart-fill"></i> Retirer</button>
+                    <button class="btn btn-primary btn-sm move-to-cart-btn d-flex align-items-center">
+                      <i class="bi bi-cart-plus"></i> <span class="ms-2">Déplacer vers le panier</span>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm toggle-wishlist-btn d-flex align-items-center">
+                      <i class="bi bi-heart-fill"></i> <span class="ms-2">Retirer</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -63,56 +67,62 @@
     function showAlert(msg, type = 'success') {
       wishlistAlert.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     }
-    // AJAX remove from wishlist
-    document.querySelectorAll('.toggle-wishlist-btn').forEach(btn => {
-      btn.addEventListener('click', async function() {
-        const card = this.closest('[data-book-id]');
-        const bookId = card.getAttribute('data-book-id');
-        this.disabled = true;
-        const res = await fetch(`/api/wishlist/${bookId}`, { method: 'DELETE' });
-        if (res.ok) {
-          card.remove();
-          showAlert('Livre retiré des favoris.','success');
-          if (wishlistCount) wishlistCount.textContent = Math.max(0, +wishlistCount.textContent - 1);
-          // If no more books, show empty message
-          if (!document.querySelector('.col-md-4')) {
-            document.getElementById('wishlistBooksContainer').innerHTML = '<div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>';
-          }
-        } else {
-          showAlert('Erreur lors du retrait.','danger');
-        }
-        this.disabled = false;
-      });
-    });
-    // AJAX move to cart
-    document.querySelectorAll('.move-to-cart-btn').forEach(btn => {
-      btn.addEventListener('click', async function() {
-        const card = this.closest('[data-book-id]');
-        const bookId = card.getAttribute('data-book-id');
-        this.disabled = true;
-        const res = await fetch(`/api/wishlist/${bookId}/move-to-cart`, { method: 'POST' });
-        if (res.ok) {
-          card.remove();
-          showAlert('Livre déplacé vers le panier.','success');
-          if (wishlistCount) wishlistCount.textContent = Math.max(0, +wishlistCount.textContent - 1);
-          if (!document.querySelector('.col-md-4')) {
-            document.getElementById('wishlistBooksContainer').innerHTML = '<div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>';
-          }
-        } else {
-          showAlert('Erreur lors du déplacement.','danger');
-        }
-        this.disabled = false;
-      });
-    });
-    // Real-time updates
-    let socket;
+
     document.addEventListener('DOMContentLoaded', function() {
+      // AJAX remove from wishlist
+      document.querySelectorAll('.toggle-wishlist-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const card = this.closest('[data-book-id]');
+          const bookId = card.getAttribute('data-book-id');
+          this.disabled = true;
+          const res = await fetch(`/api/wishlist/${bookId}`, { method: 'DELETE' });
+          if (res.ok) {
+            card.remove();
+            showAlert('Livre retiré des favoris.','success');
+            if (window.socket) window.socket.emit('wishlistUpdated', { userId });
+            if (!document.querySelector('.col-md-4')) {
+              document.getElementById('wishlistBooksContainer').innerHTML = '<div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>';
+            }
+          } else {
+            showAlert('Erreur lors du retrait.','danger');
+          }
+          this.disabled = false;
+        });
+      });
+      // AJAX move to cart
+      document.querySelectorAll('.move-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const card = this.closest('[data-book-id]');
+          const bookId = card.getAttribute('data-book-id');
+          this.disabled = true;
+          const res = await fetch(`/api/wishlist/${bookId}/move-to-cart`, { method: 'POST' });
+          if (res.ok) {
+            card.remove();
+            showAlert('Livre déplacé vers le panier.','success');
+            if (window.socket) window.socket.emit('wishlistUpdated', { userId });
+            if (!document.querySelector('.col-md-4')) {
+              document.getElementById('wishlistBooksContainer').innerHTML = '<div class="alert alert-info">Aucun livre dans vos favoris pour le moment.</div>';
+            }
+          } else {
+            showAlert('Erreur lors du déplacement.','danger');
+          }
+          this.disabled = false;
+        });
+      });
+
+      // Real-time updates
+      let socket;
       if (typeof io !== 'undefined' && userId) {
         socket = io({ transports: ['websocket', 'polling'] });
+        window.socket = socket;
         socket.on('wishlistUpdate', function(data) {
           if (data && data.userId === userId) {
-            // Reload wishlist page if update is for this user
             location.reload();
+          }
+        });
+        socket.on('wishlistUpdated', function(data) {
+          if (wishlistCount && data && data.userId === userId) {
+            wishlistCount.textContent = data.count || data.newCount;
           }
         });
       }

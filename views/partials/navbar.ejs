@@ -71,6 +71,13 @@
             <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.7rem;display:none;min-width:1.3em;min-height:1.3em;line-height:1.1em;">0</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link position-relative" href="/wishlist" title="Favoris">
+            <i class="bi bi-heart" style="font-size:1.2rem;"></i>
+            <span class="d-none d-lg-inline ms-1">Favoris</span>
+            <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.7rem;display:none;min-width:1.3em;min-height:1.3em;line-height:1.1em;">0</span>
+          </a>
+        </li>
       </ul>
     </div>
   </div>
@@ -102,6 +109,13 @@
           dot.style.display = count > 0 ? 'inline-block' : 'none';
         }
       }
+      function updateWishlistCount(count) {
+        var wishlistBadge = document.getElementById('wishlistCount');
+        if (wishlistBadge) {
+          wishlistBadge.textContent = count > 99 ? '99+' : count;
+          wishlistBadge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
+      }
       // --- Notification count logic for new book cards/images ---
       function observeNewBookCards() {
         const recentBooksList = document.getElementById('recent-books-list');
@@ -131,6 +145,16 @@
         socket.on('notificationCount', function(count) {
           updateNotifBadge(count);
         });
+        // --- Real-time wishlist count update ---
+        socket.on('wishlistCount', function(count) {
+          updateWishlistCount(count);
+        });
+        // Listen for wishlistUpdated event (from book page or others)
+        socket.on('wishlistUpdated', function(data) {
+          if (typeof data.newCount !== 'undefined') {
+            updateWishlistCount(data.newCount);
+          }
+        });
         // Listen for newBook event to increment badge in real time
         socket.on('newBook', function(book) {
           var badge = document.getElementById('notif-badge');
@@ -153,6 +177,14 @@
             });
             socket.on('notificationCount', function(count) {
               updateNotifBadge(count);
+            });
+            socket.on('wishlistCount', function(count) {
+              updateWishlistCount(count);
+            });
+            socket.on('wishlistUpdated', function(data) {
+              if (typeof data.newCount !== 'undefined') {
+                updateWishlistCount(data.newCount);
+              }
             });
             socket.on('newBook', function(book) {
               var badge = document.getElementById('notif-badge');
