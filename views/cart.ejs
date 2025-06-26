@@ -147,9 +147,10 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
   <script src="/js/client.js"></script>
-  <!-- Pass cart data to JS -->
+  <!-- Pass cart data to JS safely -->
+  <script type="application/json" id="cartBooksData"><%- JSON.stringify(cart.books) %></script>
   <script>
-    window.cartBooks = <%- JSON.stringify(cart.books) %>;
+    window.cartBooks = JSON.parse(document.getElementById('cartBooksData').textContent);
   </script>
   <!-- Checkout Modal -->
   <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
