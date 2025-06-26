@@ -159,6 +159,10 @@ app.get('/wishlist', checkAuth, async (req, res) => {
   const wishlistBooks = await Book.find({ _id: { $in: user.wishlist } });
   res.render('wishlist', { user, wishlistBooks });
 });
+// Notifications page: show recently added books
+app.get('/notifications', (req, res) => {
+  res.render('notifications', { user: req.user || null });
+});
 
 // Routes Admin
 app.get('/admin/users', checkAuth, checkAdmin, async (req, res) => {
