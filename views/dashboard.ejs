@@ -180,6 +180,58 @@
         padding: 2rem 1rem;
       }
     }
+    #chatbot-messages {
+      font-size: 1.18rem;
+      line-height: 1.6;
+    }
+    .chatbot-msg-user {
+      display: inline-block;
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+      font-size: 1.18rem;
+      font-weight: 600;
+      border-radius: 1.5rem 1.5rem 0.5rem 1.5rem;
+      padding: 0.85rem 1.3rem;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      max-width: 85%;
+      word-break: break-word;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+    }
+    .chatbot-msg-bot {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #222;
+      font-size: 1.18rem;
+      font-weight: 500;
+      border-radius: 1.5rem 1.5rem 1.5rem 0.5rem;
+      padding: 0.85rem 1.3rem;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      max-width: 85%;
+      word-break: break-word;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.07);
+    }
+    .chatbot-msg-error {
+      display: inline-block;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 1.18rem;
+      font-weight: 600;
+      border-radius: 1.5rem;
+      padding: 0.85rem 1.3rem;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      max-width: 85%;
+      word-break: break-word;
+      box-shadow: 0 2px 8px rgba(185,28,28,0.10);
+    }
+    #chatbot-messages .text-end {
+      text-align: right !important;
+    }
+    #chatbot-messages .text-start {
+      text-align: left !important;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
 </head>
@@ -365,7 +417,7 @@
       <button type="button" class="btn-close btn-close-white btn-sm" id="chatbot-close"></button>
     </div>
     <div class="card-body p-3" style="height:320px;overflow-y:auto;" id="chatbot-messages">
-      <div class="text-muted small text-center">Bonjour ! Comment puis-je vous aider ?</div>
+      <div class="text-muted small text-center chatbot-msg-bot">Bonjour ! Comment puis-je vous aider ?</div>
     </div>
     <div class="card-footer p-2">
       <form id="chatbot-form" class="d-flex gap-2">
@@ -392,7 +444,7 @@
     e.preventDefault();
     const userMsg = input.value.trim();
     if (!userMsg) return;
-    messages.innerHTML += `<div class='mb-2 text-end'><span class='badge bg-primary'>${userMsg}</span></div>`;
+    messages.innerHTML += `<div class='mb-2 text-end'><span class='chatbot-msg-user'>${userMsg}</span></div>`;
     input.value = '';
     messages.scrollTop = messages.scrollHeight;
     // Real backend call
@@ -403,10 +455,10 @@
         body: JSON.stringify({ message: userMsg })
       });
       const data = await res.json();
-      messages.innerHTML += `<div class='mb-2 text-start'><span class='badge bg-light text-dark'>${data.reply || 'Je suis un assistant virtuel. Posez-moi vos questions sur la bibliothèque !'}</span></div>`;
+      messages.innerHTML += `<div class='mb-2 text-start'><span class='chatbot-msg-bot'>${data.reply || 'Je suis un assistant virtuel. Posez-moi vos questions sur la bibliothèque !'}</span></div>`;
       messages.scrollTop = messages.scrollHeight;
     } catch {
-      messages.innerHTML += `<div class='mb-2 text-start'><span class='badge bg-danger'>Erreur de connexion au serveur.</span></div>`;
+      messages.innerHTML += `<div class='mb-2 text-start'><span class='chatbot-msg-error'>Erreur de connexion au serveur.</span></div>`;
       messages.scrollTop = messages.scrollHeight;
     }
   });
