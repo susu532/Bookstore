@@ -43,22 +43,25 @@
         <li class="nav-item"><a class="nav-link" href="/emprunts">Emprunts</a></li>
         <li class="nav-item"><a class="nav-link" href="/cart">Panier</a></li>
         <li class="nav-item"><a class="nav-link" href="/orders">Commandes</a></li>
-        <li class="nav-item"><a class="nav-link" href="/profile">Profil</a></li>
+       
         <li class="nav-item"><a class="nav-link" href="/orders/manage">historique des Commandes</a></li>
+         <li class="nav-item"><a class="nav-link" href="/profile">Profil</a></li>
         <% if (user.role === 1) { %>
         <li class="nav-item"><a class="nav-link" href="/books/manage">Gestion des Livres</a></li>
         <li class="nav-item"><a class="nav-link" href="/admin/emprunts">Gestion des Emprunts</a></li>
         <li class="nav-item"><a class="nav-link" href="/admin/users?userId=<%= user._id %>">Gestion des utilisateurs</a></li>
         <% } %>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="logout();return false;">Déconnexion</a></li>
+        
            <li class="nav-item d-flex align-items-center">
           <% if (user.avatar) { %>
-            <img src="<%= user.avatar %>" alt="Avatar" class="navbar-avatar-img me-2" data-userid="<%= user._id %>" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
+            <a href="/profile" class="navbar-avatar-link">
+            <img src="<%= user.avatar %>" alt="Avatar" class="navbar-avatar-img me-2"  data-userid="<%= user._id %>" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" /></a>
           <% } else { %>
-            <i class="bi bi-person-circle navbar-avatar-img me-2" style="font-size:2rem;"></i>
+            <i class="bi bi-person-circle navbar-avatar-img me-2"  style="font-size:2rem;"></i>
           <% } %>
         </li>
         <% } %>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="logout();return false;">Déconnexion</a></li>
       </ul>
     </div>
   </div>

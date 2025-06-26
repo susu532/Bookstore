@@ -90,10 +90,24 @@
                 </div>
                 <ul class="book-list list-unstyled mb-0">
                   <% order.books.forEach(item => { %>
-                    <li>
-                      <i class="bi bi-book-half me-1 text-primary"></i>
-                      <span class="fw-semibold"><%= item.book.title %></span>
-                      <span class="badge bg-info text-dark ms-2">Quantité : <%= item.quantity %></span>
+                    <li class="d-flex align-items-center gap-3 flex-wrap py-2">
+                      <a href="/book/<%= item.book._id %>" class="me-2 text-decoration-none" title="Voir la fiche du livre">
+                        <img src="<%= item.book.image || '/images/books/default-cover.png' %>" alt="Couverture de <%= item.book.title %>" style="width:48px;height:64px;object-fit:cover;border-radius:0.5rem;box-shadow:0 2px 8px #6366f122;" class="me-2 border">
+                      </a>
+                      <div class="flex-grow-1">
+                        <div class="fw-semibold mb-1"><%= item.book.title %></div>
+                        <div class="small text-muted mb-1">Auteur : <%= item.book.author %></div>
+                        <div class="small text-muted mb-1">Genre : <%= item.book.genre %></div>
+                        <span class="badge bg-info text-dark">Quantité : <%= item.quantity %></span>
+                      </div>
+                      <% if (item.book.image) { %>
+                        <a href="<%= item.book.image %>" download class="btn btn-sm btn-outline-secondary ms-2" title="Télécharger la couverture">
+                          <i class="bi bi-download"></i> Télécharger le livre
+                        </a>
+                      <% } %>
+                      <a href="/book/<%= item.book._id %>" class="btn btn-sm btn-outline-primary ms-2" title="Voir la fiche du livre">
+                        <i class="bi bi-eye"></i> Détails
+                      </a>
                     </li>
                   <% }) %>
                 </ul>

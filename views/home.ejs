@@ -83,11 +83,77 @@
         font-size: 2rem;
       }
     }
+    /* Styles pour la bande annonce promotionnelle d'été */
+    .summer-promo-banner {
+      background: linear-gradient(120deg, #facc15 0%, #f472b6 100%);
+      min-height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .summer-promo-banner h2 {
+      color: #fff;
+      letter-spacing: -2px;
+      text-shadow: 0 4px 24px #f472b6cc;
+    }
+    .summer-promo-banner p {
+      color: #fff;
+      text-shadow: 0 2px 12px #f472b699;
+      max-width: 500px;
+    }
+    .summer-promo-banner .btn {
+      color: #f472b6;
+      letter-spacing: 0.5px;
+    }
+    .summer-promo-banner img {
+      object-fit: cover;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 32px #f472b633;
+    }
+    .summer-promo-banner .badge {
+      border-radius: 1.5rem;
+      z-index: 3;
+    }
+    /* Styles pour la grande bande annonce lecture */
+    .reading-banner {
+      background: linear-gradient(120deg, #6366f1 0%, #60a5fa 100%);
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .reading-banner h2 {
+      color: #fff;
+      letter-spacing: -2px;
+      text-shadow: 0 6px 32px #6366f1cc;
+    }
+    .reading-banner p {
+      color: #fff;
+      text-shadow: 0 2px 16px #60a5fa99;
+      max-width: 600px;
+    }
+    .reading-banner .btn {
+      color: #6366f1;
+      letter-spacing: 0.5px;
+    }
+    .reading-banner img {
+      object-fit: cover;
+      border-radius: 2rem;
+      box-shadow: 0 8px 48px #6366f1cc;
+    }
+    .reading-banner .badge {
+      border-radius: 2rem;
+      z-index: 3;
+      letter-spacing: 1px;
+    }
   </style>
 </head>
 <body>
   <%- include('partials/navbar', { user }) %>
   <div class="container py-4">
+    <!-- Bande annonce promotion d'été -->
+    
+
     <!-- Revolution Slider Start -->
   
     <!-- Revolution Slider End -->
@@ -148,7 +214,10 @@
     <!-- Revolution Slider 2 Start -->
     
     <!-- Revolution Slider 2 End -->
-
+ <div id="recent-books-section" class="mb-4">
+          <h3 class="fw-bold mb-3" style="color:#6366f1;"><i class="bi bi-stars me-2"></i>5 Nouveautés</h3>
+          <div id="recent-books-list" class="row row-cols-1 row-cols-md-5 g-3"></div>
+        </div>
     <div class="row g-4 mb-5">
       <div class="col-md-4">
         <div class="card feature-card h-100 text-center p-4">
@@ -172,12 +241,54 @@
         </div>
       </div>
     </div>
+    <section class="summer-promo-banner mb-5 rounded-4 shadow-lg overflow-hidden position-relative" style="background:linear-gradient(120deg,#facc15 0%,#f472b6 100%);min-height:340px;display:flex;align-items:center;justify-content:center;">
+      <div class="row w-100 g-0 align-items-center">
+        <div class="col-md-6 d-flex flex-column justify-content-center align-items-start p-5">
+          <h2 class="display-2 fw-bold mb-4" style="color:#fff;letter-spacing:-2px;text-shadow:0 4px 24px #f472b6cc;">
+            <i class="bi bi-sun-fill me-2 text-warning"></i>Promo d'été !
+          </h2>
+          <p class="fs-2 mb-4" style="color:#fff;text-shadow:0 2px 12px #f472b699;max-width:500px;">
+            Jusqu'à <span class="fw-bold text-warning">-50%</span> sur une sélection de livres pour un été inoubliable. Profitez-en maintenant !
+          </p>
+          <a href="/books" class="btn btn-lg btn-light fw-bold px-5 py-3 fs-3 rounded-pill shadow-sm" style="color:#f472b6;letter-spacing:0.5px;"><i class="bi bi-bag-heart me-2"></i>Voir les offres</a>
+        </div>
+        <div class="col-md-6 d-none d-md-block position-relative">
+          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=80" alt="Livres modernes" class="img-fluid w-100 h-100" style="object-fit:cover;min-height:340px;max-height:420px;border-top-right-radius:2rem;border-bottom-right-radius:2rem;box-shadow:0 4px 32px #6366f133;">
+        </div>
+      </div>
+      <span class="position-absolute top-0 end-0 m-4 badge bg-warning text-dark fs-4 px-4 py-2 shadow-lg" style="border-radius:1.5rem;z-index:3;">Été 2025</span>
+    </section>
+       <div id="fantasy-books-section" class="mb-4">
+          <h3 class="fw-bold mb-3" style="color:#f472b6;"><i class="bi bi-magic me-2"></i>Livres Fantastique</h3>
+          <div id="fantasy-books-list" class="row row-cols-1 row-cols-md-5 g-3"></div>
+        </div>
+
+    <!-- Grande bande annonce lecture -->
+    <section class="reading-banner mb-5 rounded-4 shadow-lg overflow-hidden position-relative" style="background:linear-gradient(120deg,#6366f1 0%,#60a5fa 100%);min-height:420px;display:flex;align-items:center;justify-content:center;">
+      <div class="row w-100 g-0 align-items-center">
+        <div class="col-md-6 d-flex flex-column justify-content-center align-items-start p-5">
+          <h2 class="display-1 fw-bold mb-4" style="color:#fff;letter-spacing:-2px;text-shadow:0 6px 32px #6366f1cc;">
+            <i class="bi bi-book-half me-2 text-warning"></i>Osez Lire !
+          </h2>
+          <p class="fs-1 mb-4" style="color:#fff;text-shadow:0 2px 16px #60a5fa99;max-width:600px;">
+            Plongez dans l'aventure, la connaissance et l'imaginaire. <span class="fw-bold text-warning">La lecture change la vie</span> : commencez aujourd'hui !
+          </p>
+          <a href="/books" class="btn btn-lg btn-light fw-bold px-5 py-3 fs-2 rounded-pill shadow-sm" style="color:#6366f1;letter-spacing:0.5px;"><i class="bi bi-arrow-right-circle me-2"></i>Découvrir la bibliothèque</a>
+        </div>
+        <div class="col-md-6 d-none d-md-block position-relative">
+          <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80" alt="Lecture inspirante" class="img-fluid w-100 h-100" style="object-fit:cover;min-height:420px;max-height:520px;border-top-right-radius:2rem;border-bottom-right-radius:2rem;box-shadow:0 8px 48px #6366f1cc;">
+        </div>
+      </div>
+      <span class="position-absolute top-0 end-0 m-4 badge bg-light text-primary fs-3 px-5 py-3 shadow-lg" style="border-radius:2rem;z-index:3;letter-spacing:1px;">#LireCestVivre</span>
+    </section>
 
     <div class="row g-4 mb-5">
       <div class="col-12">
-        <div id="recent-books-section" class="mb-4">
-          <h3 class="fw-bold mb-3" style="color:#6366f1;"><i class="bi bi-stars me-2"></i>5 Nouveautés</h3>
-          <div id="recent-books-list" class="row row-cols-1 row-cols-md-5 g-3"></div>
+       
+     
+        <div id="scifi-books-section" class="mb-4">
+          <h3 class="fw-bold mb-3" style="color:#60a5fa;"><i class="bi bi-rocket-takeoff me-2"></i>Livres Science-Fiction</h3>
+          <div id="scifi-books-list" class="row row-cols-1 row-cols-md-5 g-3"></div>
         </div>
       </div>
     </div>
@@ -250,6 +361,68 @@
         `).join('');
       });
     });
+    // Fetch and display 5 "Fantastique" books
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/books/filter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ genre: 'Fantastique' })
+    })
+    .then(res => res.json())
+    .then(books => {
+      const list = document.getElementById('fantasy-books-list');
+      if (!books || !books.length) {
+        list.innerHTML = '<div class="col"><div class="alert alert-info">Aucun livre fantastique trouvé.</div></div>';
+        return;
+      }
+      // Show up to 5 books
+      list.innerHTML = books.slice(0,5).map(book => `
+        <div class="col">
+          <div class="card h-100 shadow-sm border-0 rounded-4 recent-book-card">
+            <img src="${book.image ? book.image : '/images/books/default-cover.png'}" class="card-img-top rounded-top-4" alt="${book.title}" style="height:180px;object-fit:cover;">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h6 class="card-title fw-bold mb-1" style="color:#f472b6;">${book.title}</h6>
+              <div class="mb-1 text-muted small">${book.author}</div>
+              <div class="mb-2"><span class="badge bg-light text-secondary border">${book.genre}</span></div>
+              <div class="fw-bold mb-2" style="color:#374151;">${book.price ? book.price.toFixed(2) : ''} €</div>
+              <a href="/book/${book._id}" class="btn btn-outline-pink btn-sm mt-auto w-100" style="border-color:#f472b6;color:#f472b6;">Voir</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    });
+  });
+  // Fetch and display 5 "Science-Fiction" books
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/books/filter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ genre: 'Science-Fiction' })
+    })
+    .then(res => res.json())
+    .then(books => {
+      const list = document.getElementById('scifi-books-list');
+      if (!books || !books.length) {
+        list.innerHTML = '<div class="col"><div class="alert alert-info">Aucun livre science-fiction trouvé.</div></div>';
+        return;
+      }
+      // Show up to 5 books
+      list.innerHTML = books.slice(0,5).map(book => `
+        <div class="col">
+          <div class="card h-100 shadow-sm border-0 rounded-4 recent-book-card">
+            <img src="${book.image ? book.image : '/images/books/default-cover.png'}" class="card-img-top rounded-top-4" alt="${book.title}" style="height:180px;object-fit:cover;">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h6 class="card-title fw-bold mb-1" style="color:#60a5fa;">${book.title}</h6>
+              <div class="mb-1 text-muted small">${book.author}</div>
+              <div class="mb-2"><span class="badge bg-light text-secondary border">${book.genre}</span></div>
+              <div class="fw-bold mb-2" style="color:#374151;">${book.price ? book.price.toFixed(2) : ''} €</div>
+              <a href="/book/${book._id}" class="btn btn-outline-info btn-sm mt-auto w-100" style="border-color:#60a5fa;color:#60a5fa;">Voir</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    });
+  });
   </script>
 </body>
 </html>

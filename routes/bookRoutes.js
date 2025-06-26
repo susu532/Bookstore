@@ -308,4 +308,34 @@ router.get('/recent', async (req, res) => {
   }
 });
 
+// Filtrer les livres dynamiquement
+router.post('/filter', async (req, res) => {
+  try {
+    const { title, author, genre, minPrice, maxPrice, sortBy, sortOrder } = req.body;
+    const filter = {};
+    if (title) filter.title = { $regex: title, $options: 'i' };
+    if (author) filter.author = { $regex: author, $options: 'i' };
+    if (genre) filter.genre = { $regex: genre, $options: 'i' };
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.price = {};
+      if (minPrice !== undefined) filter.price.$gte = minPrice;
+      if (maxPrice !== undefined) filter.price.$lte = maxPrice;
+    }
+    let sort = {};
+    if (sortBy) {
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    }
+    let books = await Book.find(filter).sort(sort);
+    books = books.map(book => {
+      book = book.toObject();
+      if (!book.image) book.image = '/images/books/default-cover.png';
+      return book;
+    });
+    res.json(books);
+  } catch (err) {
+    console.error('Erreur lors du filtrage des livres :', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

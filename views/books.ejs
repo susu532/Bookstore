@@ -88,27 +88,67 @@
       </h2>
       <p class="mb-0 fs-5">Découvrez notre collection variée et trouvez votre prochain coup de cœur.</p>
     </div>
-    <form class="mb-4" id="searchBooksForm" autocomplete="off">
-      <div class="input-group search-bar mb-2">
-        <input type="text" class="form-control border-0 shadow-none" id="searchQuery" placeholder="Rechercher par titre...">
-        <button type="submit" class="btn btn-primary px-4">Rechercher</button>
-      </div>
-      <div class="row g-2 mb-2">
-        <div class="col-md-6">
-          <select class="form-select" id="authorFilter">
-            <option value="">Tous les auteurs</option>
-          </select>
+    <!-- Modern Filter Sidebar -->
+    <div class="row">
+      <div class="col-lg-3 mb-4">
+        <div class="card shadow-sm border-0 p-3 sticky-top" style="top:90px;background:linear-gradient(135deg,#f8fafc 80%,#e0e7ff 100%);">
+          <h5 class="mb-3 text-primary d-flex align-items-center gap-2" style="font-weight:700;">
+            <svg width="22" height="22" fill="currentColor" class="me-1" viewBox="0 0 16 16"><path d="M6 10.117V14.5a.5.5 0 0 0 .757.429l2.285-1.428A.5.5 0 0 0 9.5 13.5v-3.383l4.447-4.276A.5.5 0 0 0 13.947 5H2.053a.5.5 0 0 0-.353.841L6 10.117z"/></svg>
+            Filtres avancés
+          </h5>
+          <form id="searchBooksForm" autocomplete="off">
+            <div class="mb-3">
+              <label for="searchQuery" class="form-label fw-semibold">Titre</label>
+              <input type="text" class="form-control" id="searchQuery" placeholder="Rechercher par titre...">
+            </div>
+            <div class="mb-3">
+              <label for="authorFilter" class="form-label fw-semibold">Auteur</label>
+              <select class="form-select" id="authorFilter">
+                <option value="">Tous les auteurs</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="genreFilter" class="form-label fw-semibold">Genre</label>
+              <select class="form-select" id="genreFilter">
+                <option value="">Tous les genres</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="minPrice" class="form-label fw-semibold">Prix min</label>
+              <input type="number" class="form-control" id="minPrice" min="0" placeholder="0">
+            </div>
+            <div class="mb-3">
+              <label for="maxPrice" class="form-label fw-semibold">Prix max</label>
+              <input type="number" class="form-control" id="maxPrice" min="0" placeholder="100">
+            </div>
+            <div class="mb-3">
+              <label for="sortBy" class="form-label fw-semibold">Trier par</label>
+              <select class="form-select" id="sortBy">
+                <option value="">Aucun</option>
+                <option value="price">Prix</option>
+                <option value="title">Titre</option>
+                <option value="author">Auteur</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="sortOrder" class="form-label fw-semibold">Ordre</label>
+              <select class="form-select" id="sortOrder">
+                <option value="asc">Croissant</option>
+                <option value="desc">Décroissant</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2 mt-2" style="font-weight:600;">Rechercher</button>
+            <button type="button" class="btn btn-outline-secondary w-100 py-2 mt-2" id="resetFilters">Réinitialiser</button>
+          </form>
         </div>
-        <div class="col-md-6">
-          <select class="form-select" id="genreFilter">
-            <option value="">Tous les genres</option>
-          </select>
+      </div>
+      <div class="col-lg-9">
+        <div class="row g-4" id="booksContainer">
+          <!-- Le contenu sera injecté dynamiquement par JS -->
         </div>
       </div>
-    </form>
-    <div class="row g-4" id="booksContainer">
-      <!-- Le contenu sera injecté dynamiquement par JS -->
     </div>
+    <!-- End Modern Filter Sidebar -->
   </div>
   <%- include('partials/footer') %>
   <% if (user) { %>
@@ -222,19 +262,43 @@
     }
     document.addEventListener('DOMContentLoaded', loadAllBooks);
 
-    // Recherche dynamique avec filtres
-    document.getElementById('searchBooksForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Filter/search books with all filters
+    async function filterBooks(e) {
+      if (e) e.preventDefault();
       const query = document.getElementById('searchQuery').value;
       const author = document.getElementById('authorFilter').value;
       const genre = document.getElementById('genreFilter').value;
-      const params = new URLSearchParams();
-      if (query) params.append('query', query);
-      if (author) params.append('author', author);
-      if (genre) params.append('genre', genre);
-      const res = await fetch(`/api/books/search?${params.toString()}`);
+      const minPrice = document.getElementById('minPrice').value;
+      const maxPrice = document.getElementById('maxPrice').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const sortOrder = document.getElementById('sortOrder').value;
+      const body = {
+        title: query,
+        author,
+        genre,
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        sortBy: sortBy || undefined,
+        sortOrder: sortOrder || undefined
+      };
+      const res = await fetch('/api/books/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
       const books = await res.json();
       renderBooks(books);
+    }
+    document.getElementById('searchBooksForm').addEventListener('submit', filterBooks);
+    document.getElementById('resetFilters').addEventListener('click', function() {
+      document.getElementById('searchQuery').value = '';
+      document.getElementById('authorFilter').value = '';
+      document.getElementById('genreFilter').value = '';
+      document.getElementById('minPrice').value = '';
+      document.getElementById('maxPrice').value = '';
+      document.getElementById('sortBy').value = '';
+      document.getElementById('sortOrder').value = 'asc';
+      filterBooks();
     });
 
     // Update gamification bar in real time
@@ -289,7 +353,30 @@
         // ...existing code for comment UI refresh...
       });
     }
+
+    // Responsive: move filter card above books on mobile
+    function moveFilterSidebar() {
+      const filterCol = document.querySelector('.col-lg-3');
+      const booksCol = document.querySelector('.col-lg-9');
+      if (window.innerWidth < 992) {
+        if (filterCol && booksCol && filterCol.nextElementSibling !== booksCol) {
+          booksCol.parentNode.insertBefore(filterCol, booksCol);
+        }
+      } else {
+        const row = document.querySelector('.container .row');
+        if (row && row.firstElementChild !== filterCol) {
+          row.insertBefore(filterCol, row.firstElementChild);
+        }
+      }
+    }
+    window.addEventListener('resize', moveFilterSidebar);
+    document.addEventListener('DOMContentLoaded', moveFilterSidebar);
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    @media (max-width: 991.98px) {
+      .sticky-top { position:static!important; }
+    }
+  </style>
 </body>
 </html>

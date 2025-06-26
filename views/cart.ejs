@@ -116,9 +116,20 @@
               <ul class="list-group mb-4 border-0">
                 <% cart.books.forEach(item => { %>
                   <li class="cart-list-item list-group-item d-flex flex-wrap align-items-center justify-content-between">
-                    <span class="cart-title"><%= item.book.title %></span>
-                    <span class="cart-qty">Quantité : <%= item.quantity %></span>
-                    <span class="cart-price">Prix : <%= (item.book.price * item.quantity).toFixed(2) %> €</span>
+                    <div class="d-flex align-items-center gap-3">
+                      <img src="<%= item.book.image || '/images/books/default-cover.png' %>" alt="Couverture de <%= item.book.title %>" style="width:48px;height:68px;object-fit:cover;border-radius:0.4rem;box-shadow:0 2px 8px #6366f122;" class="me-2 border">
+                      <div>
+                        <div class="cart-title mb-1"><%= item.book.title %></div>
+                        <div class="small text-muted">Auteur : <%= item.book.author || '' %></div>
+                        <div class="small text-muted">Genre : <%= item.book.genre || '' %></div>
+                        <div class="small text-muted">Éditeur : <%= item.book.publisher || '' %></div>
+                        <div class="small text-muted">Année : <%= item.book.year || '' %></div>
+                      </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end">
+                      <span class="cart-qty">Quantité : <%= item.quantity %></span>
+                      <span class="cart-price">Prix : <%= (item.book.price * item.quantity).toFixed(2) %> €</span>
+                    </div>
                   </li>
                 <% }) %>
               </ul>
@@ -213,9 +224,20 @@
     // Fill order summary dynamically
     document.getElementById('checkoutModal').addEventListener('show.bs.modal', function () {
       const summary = document.getElementById('orderSummary');
-      let html = '<ul>';
+      let html = '<ul style="list-style:none;padding-left:0;">';
       window.cartBooks.forEach(item => {
-        html += `<li><strong>${item.book.title}</strong> x ${item.quantity} — ${(item.book.price * item.quantity).toFixed(2)} €</li>`;
+        html += `<li class="d-flex align-items-center gap-3 mb-2">
+          <img src="${item.book.image || '/images/books/default-cover.png'}" alt="Couverture de ${item.book.title}" style="width:56px;height:80px;object-fit:cover;border-radius:0.5rem;box-shadow:0 2px 8px #6366f122;" class="me-2 border">
+          <div>
+            <div class="fw-semibold fs-5 mb-1">${item.book.title}</div>
+            <div class="small text-muted mb-1">Auteur : <span class="fw-semibold text-dark">${item.book.author || ''}</span></div>
+            <div class="small text-muted mb-1">Genre : <span class="fw-semibold text-dark">${item.book.genre || ''}</span></div>
+            <div class="small text-muted mb-1">Éditeur : <span class="fw-semibold text-dark">${item.book.publisher || '-'}</span></div>
+            <div class="small text-muted mb-1">Année : <span class="fw-semibold text-dark">${item.book.year || '-'}</span></div>
+            <span class="badge bg-info text-dark">Quantité : ${item.quantity}</span>
+            <span class="ms-2 fw-bold">${(item.book.price * item.quantity).toFixed(2)} €</span>
+          </div>
+        </li>`;
       });
       html += '</ul>';
       summary.innerHTML = html;

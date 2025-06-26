@@ -143,17 +143,39 @@
   <div class="container mb-5">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="card p-4 shadow-sm mb-4">
-          <h4 class="mb-3">Commentaires & Avis</h4>
-          <% if (user) { %>
-          <form id="commentForm" class="mb-4">
-            <div class="mb-2">
-              <label for="commentText" class="form-label">Votre commentaire</label>
-              <textarea class="form-control" id="commentText" rows="2" required></textarea>
+        <div class="card p-4 shadow-sm mb-4" style="background:linear-gradient(90deg,#fff 60%,#e0e7ff 100%);border-radius:2.5rem;box-shadow:0 8px 32px 0 rgba(99,102,241,0.13);">
+          <h4 class="mb-4 display-4 fw-bold text-primary text-center" style="font-size:2.8rem;letter-spacing:-1.5px;text-shadow:0 2px 16px #6366f133;">
+            <i class="bi bi-chat-dots-fill me-2 text-info"></i>Commentaires & Avis
+          </h4>
+          <!-- Customer Review Stats Modern Card -->
+          <div class="review-stats-card d-flex align-items-center gap-4 mb-5 p-4 rounded-4 shadow-sm" style="background:linear-gradient(90deg,#f8fafc 0%,#e0e7ff 100%);border:2px solid #e0e7ff;">
+            <div class="review-hero-img d-flex align-items-center justify-content-center" style="min-width:110px;">
+              <img src="/images/books/review-hero.png" alt="Avis clients" style="width:100px;height:100px;object-fit:cover;border-radius:2rem;box-shadow:0 2px 16px #6366f133;background:#fff;" onerror="this.src='https://api.dicebear.com/7.x/thumbs/svg?seed=Review'">
             </div>
-            <div class="mb-2 d-flex align-items-center gap-2">
-              <label class="form-label mb-0">Note :</label>
-              <span id="starRating">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-end gap-3 mb-2">
+                <span class="display-3 fw-bold text-warning" id="avgRatingStat" style="font-size:3.2rem;">-</span>
+                <span class="fs-3 text-muted mb-1">/ 5</span>
+                <span class="badge bg-gradient text-dark ms-2 py-2 px-3" id="reviewCountStat" style="background:linear-gradient(90deg,#6366f1 0%,#06b6d4 100%);color:#fff;font-size:1.3rem;letter-spacing:0.5px;">0 avis</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 mb-2" id="reviewStarsStat" style="font-size:2.1rem;">
+                <!-- Stars will be rendered here -->
+              </div>
+              <div class="progress mt-2" style="height:14px;max-width:260px;background:#e0e7ff;">
+                <div class="progress-bar bg-primary" id="reviewProgressStat" role="progressbar" style="width:0%;font-size:1.1rem;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- End Review Stats Card -->
+          <% if (user) { %>
+          <form id="commentForm" class="mb-5 p-4 rounded-4 shadow-sm" style="background:linear-gradient(90deg,#f8fafc 0%,#e0e7ff 100%);border:2px solid #e0e7ff;">
+            <div class="mb-4">
+              <label for="commentText" class="form-label fs-3 fw-bold text-primary">Votre commentaire</label>
+              <textarea class="form-control fs-4 p-3" id="commentText" rows="3" required style="border-radius:1.2rem;min-height:90px;"></textarea>
+            </div>
+            <div class="mb-4 d-flex align-items-center gap-3">
+              <label class="form-label mb-0 fs-3 fw-bold text-primary">Note :</label>
+              <span id="starRating" style="font-size:2.3rem;">
                 <i class="bi bi-star" data-value="1"></i>
                 <i class="bi bi-star" data-value="2"></i>
                 <i class="bi bi-star" data-value="3"></i>
@@ -162,14 +184,14 @@
               </span>
               <input type="hidden" id="ratingValue" value="0">
             </div>
-            <div class="mb-2 d-flex align-items-center gap-2">
-              <button type="button" class="btn btn-outline-success btn-sm" id="likeBtn"><i class="bi bi-hand-thumbs-up"></i> Like</button>
-              <button type="button" class="btn btn-outline-danger btn-sm" id="dislikeBtn"><i class="bi bi-hand-thumbs-down"></i> Dislike</button>
+            <div class="mb-4 d-flex align-items-center gap-3">
+              <button type="button" class="btn btn-outline-success btn-lg px-4 py-2 fs-4" id="likeBtn" style="border-radius:1.5rem;"><i class="bi bi-hand-thumbs-up"></i> Like</button>
+              <button type="button" class="btn btn-outline-danger btn-lg px-4 py-2 fs-4" id="dislikeBtn" style="border-radius:1.5rem;"><i class="bi bi-hand-thumbs-down"></i> Dislike</button>
             </div>
-            <button type="submit" class="btn btn-primary">Envoyer</button>
+            <button type="submit" class="btn btn-primary btn-lg w-100 fs-3 py-3" style="border-radius:2rem;font-weight:700;letter-spacing:0.5px;">Envoyer <i class="bi bi-send ms-2"></i></button>
           </form>
           <% } else { %>
-            <div class="alert alert-info">Connectez-vous pour commenter et noter ce livre.</div>
+            <div class="alert alert-info fs-4 p-4 text-center">Connectez-vous pour commenter et noter ce livre.</div>
           <% } %>
           <div id="commentsList"></div>
         </div>
@@ -284,6 +306,25 @@
       renderComments(comments);
     }
     loadComments();
+    // --- Review Stats Card Logic ---
+    async function loadReviewStats() {
+      const res = await fetch(`/api/books/<%= book._id %>/comments`);
+      const comments = await res.json();
+      let avg = 0, count = 0;
+      comments.forEach(c => { if (c.rating) { avg += c.rating; count++; } });
+      avg = count ? (avg / count) : 0;
+      document.getElementById('avgRatingStat').textContent = avg ? avg.toFixed(1) : '-';
+      document.getElementById('reviewCountStat').textContent = `${count} avis`;
+      // Render stars
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        starsHtml += `<i class='bi ${i <= Math.round(avg) ? 'bi-star-fill text-warning' : 'bi-star text-secondary'} fs-5'></i>`;
+      }
+      document.getElementById('reviewStarsStat').innerHTML = starsHtml;
+      // Progress bar (out of 5)
+      document.getElementById('reviewProgressStat').style.width = `${(avg/5)*100}%`;
+    }
+    loadReviewStats();
   </script>
   <% if (user) { %>
   <script>
@@ -472,4 +513,55 @@
           document.getElementById('moveToCartBtn').remove();
           // Optionally, update cart count in navbar
           const cartCount = document.getElementById('cartCount');
-          if
+          if (cartCount) {
+            cartCount.textContent = parseInt(cartCount.textContent) + 1;
+          }
+        } else {
+          showWishlistBookAlert('Erreur lors du déplacement vers le panier.', 'danger');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        showWishlistBookAlert('Erreur lors du déplacement vers le panier.', 'danger');
+      });
+    }
+  </script>
+  <script>
+    // Real-time update for comments and reviews
+    const socket = io();
+    socket.on('newComment', data => {
+      if (data.bookId === '<%= book._id %>') {
+        loadComments();
+        loadReviewStats();
+      }
+    });
+    socket.on('commentDeleted', data => {
+      if (data.bookId === '<%= book._id %>') {
+        loadComments();
+        loadReviewStats();
+      }
+    });
+    socket.on('commentUpdated', data => {
+      if (data.bookId === '<%= book._id %>') {
+        loadComments();
+        loadReviewStats();
+      }
+    });
+    socket.on('wishlistUpdated', data => {
+      if (data.bookId === '<%= book._id %>') {
+        const count = data.newCount;
+        const wishlistCount = document.getElementById('wishlistCount');
+        if (wishlistCount) wishlistCount.textContent = count;
+        // Update the wishlist button state
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        if (wishlistBtn) {
+          const inWishlist = count > 0;
+          wishlistBtn.querySelector('i').classList.toggle('bi-heart-fill', inWishlist);
+          wishlistBtn.querySelector('i').classList.toggle('bi-heart', !inWishlist);
+          wishlistBtnText.textContent = inWishlist ? 'Retirer des favoris' : 'Ajouter aux favoris';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
