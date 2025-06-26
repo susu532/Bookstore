@@ -129,6 +129,7 @@
                     <div class="d-flex flex-column align-items-end">
                       <span class="cart-qty">Quantité : <%= item.quantity %></span>
                       <span class="cart-price">Prix : <%= (item.book.price * item.quantity).toFixed(2) %> €</span>
+                      <button class="btn btn-sm btn-outline-danger mt-2 remove-from-cart-btn" data-book-id="<%= item.book._id %>" title="Supprimer du panier"><i class="bi bi-trash"></i> Supprimer</button>
                     </div>
                   </li>
                 <% }) %>
@@ -264,6 +265,25 @@
       } else {
         alert('Erreur lors de la commande.');
       }
+    });
+
+    // Remove book from cart (frontend)
+    document.querySelectorAll('.remove-from-cart-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const bookId = this.getAttribute('data-book-id');
+        if (!bookId) return;
+        if (!confirm('Voulez-vous vraiment supprimer ce livre du panier ?')) return;
+        const res = await fetch('/api/cart/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookId })
+        });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          alert('Erreur lors de la suppression du livre du panier.');
+        }
+      });
     });
   </script>
 </body>

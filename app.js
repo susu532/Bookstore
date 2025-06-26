@@ -77,6 +77,7 @@ app.use('/api/emprunts', require('./routes/empruntRoutes'));
 app.use('/api/books', require('./routes/bookUploadRoutes'));
 app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/chatbot', require('./routes/chatbot'));
+app.use('/api/cart', require('./routes/cartRoutes'));
 
 // Auth middleware for protected routes
 const checkAuth = (req, res, next) => {
